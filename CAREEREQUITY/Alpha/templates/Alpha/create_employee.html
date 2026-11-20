@@ -1,0 +1,213 @@
+
+{% extends "Alpha/base_dashboard.html" %}
+
+{% block content %}
+
+<style>
+.employee-form-container {
+    max-width: 850px;
+    margin: 25px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.employee-form-container h2 {
+    margin-bottom: 8px;
+    color: #172554;
+}
+
+.employee-form-container .subtitle {
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+.employee-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #2563eb;
+}
+
+.form-section-title {
+    grid-column: 1 / -1;
+    margin-top: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e40af;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.submit-button {
+    grid-column: 1 / -1;
+    border: none;
+    padding: 14px;
+    background: #2563eb;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.submit-button:hover {
+    background: #1d4ed8;
+}
+
+@media(max-width: 600px) {
+    .employee-form {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full,
+    .form-section-title,
+    .submit-button {
+        grid-column: 1;
+    }
+
+    .employee-form-container {
+        padding: 20px;
+    }
+}
+</style>
+
+<div class="employee-form-container">
+
+    <h2>Add New Employee</h2>
+
+    <p class="subtitle">
+        Create an employee account and add their professional details.
+    </p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding:12px; margin-bottom:12px;
+                        border-radius:8px; background:#eff6ff;
+                        color:#1e40af;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" class="employee-form">
+        {% csrf_token %}
+
+        <div class="form-section-title">
+            Personal Information
+        </div>
+
+        <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" name="full_name"
+                   placeholder="Enter employee name" required>
+        </div>
+
+        <div class="form-group">
+            <label>Employee ID *</label>
+            <input type="text" name="employee_id"
+                   placeholder="Example: CE001" required>
+        </div>
+
+        <div class="form-group full">
+            <label>Email Address *</label>
+            <input type="email" name="email"
+                   placeholder="employee@example.com" required>
+        </div>
+
+        <div class="form-section-title">
+            Professional Information
+        </div>
+
+        <div class="form-group">
+            <label>Department *</label>
+            <select name="department" required>
+                <option value="">Select Department</option>
+                {% for department in departments %}
+                    <option value="{{ department.id }}">
+                        {{ department.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Job Position *</label>
+            <select name="position" required>
+                <option value="">Select Job Position</option>
+                {% for position in positions %}
+                    <option value="{{ position.id }}">
+                        {{ position.title }} - {{ position.department.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Experience (Years)</label>
+            <input type="number" name="experience_years"
+                   min="0" max="999.9" step="0.1" value="0">
+        </div>
+
+        <div class="form-group">
+            <label>Joining Date</label>
+            <input type="date" name="joining_date">
+        </div>
+
+        <div class="form-section-title">
+            Login Credentials
+        </div>
+
+        <div class="form-group">
+            <label>Temporary Password *</label>
+            <input type="password" name="password"
+                   minlength="8" required>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm Password *</label>
+            <input type="password" name="confirm_password"
+                   minlength="8" required>
+        </div>
+
+        <button type="submit" class="submit-button">
+            Create Employee Account
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

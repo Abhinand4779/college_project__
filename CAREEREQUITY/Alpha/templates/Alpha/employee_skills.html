@@ -1,0 +1,168 @@
+
+{% extends "Alpha/base_dashboard.html" %}
+
+{% block content %}
+
+<div class="skills-page">
+
+    <div class="skills-heading">
+        <div>
+            <span class="skills-eyebrow">EMPLOYEE DEVELOPMENT</span>
+            <h1>My Skills</h1>
+            <p>Manage your professional skills and track your proficiency.</p>
+        </div>
+
+        <div class="skills-total">
+            <span>{{ total_skills }}</span>
+            <small>Total Skills</small>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="skills-message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="skills-layout">
+
+        <section class="skills-card add-skill-card">
+            <div class="skills-card-heading">
+                <div class="skills-icon">+</div>
+                <div>
+                    <h2>Add New Skill</h2>
+                    <p>Add a professional skill to your profile.</p>
+                </div>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <input type="hidden" name="action" value="add">
+
+                <label for="skill_name">Skill Name</label>
+                <input
+                    type="text"
+                    id="skill_name"
+                    name="skill_name"
+                    placeholder="Example: Python, Java, Communication"
+                    maxlength="100"
+                    required
+                >
+
+                <label for="proficiency">Proficiency Level</label>
+                <select id="proficiency" name="proficiency" required>
+                    <option value="">Select proficiency</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="Expert">Expert</option>
+                </select>
+
+                <button type="submit" class="skills-primary-btn">
+                    + Add Skill
+                </button>
+            </form>
+        </section>
+
+        <section class="skills-card skills-list-card">
+            <div class="skills-card-heading">
+                <div>
+                    <h2>My Professional Skills</h2>
+                    <p>Your currently recorded skills.</p>
+                </div>
+            </div>
+
+            {% if skills %}
+
+                <div class="skills-list">
+
+                    {% for item in skills %}
+
+                        <div class="skill-item">
+
+                            <div class="skill-details">
+                                <div class="skill-name">
+                                    {{ item.skill.name }}
+                                </div>
+
+                                <span class="proficiency-badge
+                                    {{ item.proficiency|lower }}">
+                                    {{ item.proficiency }}
+                                </span>
+                            </div>
+
+                            <div class="skill-actions">
+
+                                <form method="POST" class="skill-edit-form">
+                                    {% csrf_token %}
+
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="skill_id" value="{{ item.id }}">
+
+                                    <select name="proficiency" aria-label="Change proficiency">
+                                        <option value="Beginner"
+                                            {% if item.proficiency == "Beginner" %}selected{% endif %}>
+                                            Beginner
+                                        </option>
+
+                                        <option value="Intermediate"
+                                            {% if item.proficiency == "Intermediate" %}selected{% endif %}>
+                                            Intermediate
+                                        </option>
+
+                                        <option value="Advanced"
+                                            {% if item.proficiency == "Advanced" %}selected{% endif %}>
+                                            Advanced
+                                        </option>
+
+                                        <option value="Expert"
+                                            {% if item.proficiency == "Expert" %}selected{% endif %}>
+                                            Expert
+                                        </option>
+                                    </select>
+
+                                    <button type="submit" class="skills-update-btn">
+                                        Update
+                                    </button>
+                                </form>
+
+                                <form method="POST"
+                                      onsubmit="return confirm('Are you sure you want to delete this skill?');">
+                                    {% csrf_token %}
+
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="skill_id" value="{{ item.id }}">
+
+                                    <button type="submit" class="skills-delete-btn">
+                                        Delete
+                                    </button>
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="skills-empty">
+                    <div class="empty-icon">✦</div>
+                    <h3>No Skills Added Yet</h3>
+                    <p>Add your first professional skill using the form.</p>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+</div>
+
+{% endblock %}

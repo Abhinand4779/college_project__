@@ -1,0 +1,506 @@
+
+/* =========================================
+   CAREEREQUITY AI - EMPLOYEE INNER PAGES
+   Separate stylesheet: employee_pages.css
+   ========================================= */
+
+.employee-page {
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    color: #20243a;
+}
+
+.employee-page,
+.employee-page * {
+    box-sizing: border-box;
+}
+
+.employee-page .page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.employee-page .page-heading h1 {
+    font-size: 25px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: #20243a;
+}
+
+.employee-page .page-heading p {
+    color: #8990a5;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.employee-page .eyebrow {
+    color: #6258df;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 9px;
+}
+
+.employee-page .page-date {
+    padding: 10px 14px;
+    border-radius: 9px;
+    background: #f0efff;
+    color: #6258df;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.employee-page .hero-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 27px 30px;
+    border-radius: 17px;
+    color: white;
+    background: linear-gradient(115deg, #282a54, #6258df);
+    margin-bottom: 24px;
+}
+
+.employee-page .hero-card h2 {
+    font-size: 22px;
+    margin-bottom: 9px;
+}
+
+.employee-page .hero-card p {
+    color: #e0e0f5;
+    font-size: 12px;
+    line-height: 1.7;
+    max-width: 650px;
+}
+
+.employee-page .hero-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    background: rgba(255,255,255,.15);
+    font-size: 29px;
+}
+
+.employee-page .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 23px;
+}
+
+.employee-page .info-card {
+    background: #fff;
+    border: 1px solid #eceef5;
+    border-radius: 14px;
+    padding: 19px;
+    min-width: 0;
+    box-shadow: 0 4px 15px rgba(30,35,70,.025);
+}
+
+.employee-page .info-card .card-icon {
+    width: 39px;
+    height: 39px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #f0edff;
+    color: #6258df;
+    font-size: 17px;
+    margin-bottom: 15px;
+}
+
+.employee-page .info-card small {
+    color: #8990a5;
+    font-size: 11px;
+}
+
+.employee-page .info-card h3 {
+    font-size: 22px;
+    margin: 8px 0 5px;
+    overflow-wrap: anywhere;
+}
+
+.employee-page .info-card p {
+    color: #8990a5;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+.employee-page .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+    gap: 19px;
+    margin-bottom: 20px;
+}
+
+.employee-page .page-card {
+    background: #fff;
+    border: 1px solid #eceef5;
+    border-radius: 14px;
+    padding: 22px;
+    min-width: 0;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(30,35,70,.025);
+}
+
+.employee-page .card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.employee-page .card-heading h3 {
+    font-size: 15px;
+    color: #20243a;
+}
+
+.employee-page .card-heading p {
+    font-size: 11px;
+    color: #8990a5;
+    margin-top: 5px;
+}
+
+.employee-page .detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+
+.employee-page .detail-item {
+    padding: 15px;
+    background: #f8f8fc;
+    border-radius: 10px;
+    min-width: 0;
+}
+
+.employee-page .detail-item span {
+    display: block;
+    color: #8990a5;
+    font-size: 10px;
+    margin-bottom: 7px;
+}
+
+.employee-page .detail-item strong {
+    display: block;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+    color: #20243a;
+}
+
+.employee-page .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    margin-bottom: 23px;
+}
+
+.employee-page .profile-avatar {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 20px;
+    color: white;
+    background: linear-gradient(135deg, #7266e8, #a49af8);
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.employee-page .profile-header h2 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.employee-page .profile-header p {
+    font-size: 11px;
+    color: #8990a5;
+}
+
+.employee-page .skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.employee-page .skill-chip {
+    padding: 10px 14px;
+    border-radius: 9px;
+    color: #6258c9;
+    background: #f0efff;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.employee-page .skill-row {
+    padding: 15px 0;
+    border-bottom: 1px solid #eceef5;
+}
+
+.employee-page .skill-row:last-child {
+    border-bottom: 0;
+}
+
+.employee-page .skill-row-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px;
+    font-size: 12px;
+}
+
+.employee-page .skill-row-top span:last-child {
+    color: #6258df;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.employee-page .progress-track {
+    height: 7px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #eeeef5;
+}
+
+.employee-page .progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #6258df, #9188ff);
+}
+
+.employee-page .status-pill {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #f0efff;
+    color: #6258df;
+}
+
+.employee-page .status-pill.success {
+    color: #16996e;
+    background: #e7f8f0;
+}
+
+.employee-page .status-pill.warning {
+    color: #d88927;
+    background: #fff3e2;
+}
+
+.employee-page .status-pill.info {
+    color: #3987ce;
+    background: #e9f3ff;
+}
+
+.employee-page .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.employee-page table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+}
+
+.employee-page th {
+    padding: 13px;
+    text-align: left;
+    background: #f8f8fc;
+    color: #858ba0;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.employee-page td {
+    padding: 15px 13px;
+    border-bottom: 1px solid #eceef5;
+    font-size: 11px;
+    color: #656b7f;
+}
+
+.employee-page td strong {
+    color: #20243a;
+}
+
+.employee-page .empty-state {
+    text-align: center;
+    padding: 35px 15px;
+    color: #8990a5;
+    background: #f8f8fc;
+    border-radius: 11px;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.employee-page .empty-state strong {
+    display: block;
+    color: #20243a;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.employee-page .notice {
+    padding: 14px 16px;
+    border-radius: 10px;
+    color: #80652b;
+    background: #fff9e9;
+    font-size: 11px;
+    line-height: 1.7;
+    margin-top: 15px;
+}
+
+.employee-page .roadmap {
+    position: relative;
+}
+
+.employee-page .roadmap-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+}
+
+.employee-page .roadmap-number {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #efedff;
+    color: #6258df;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.employee-page .roadmap-item h4 {
+    font-size: 12px;
+    margin: 3px 0 6px;
+}
+
+.employee-page .roadmap-item p {
+    color: #8990a5;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+.employee-page .salary-box {
+    padding: 24px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #f2f0ff, #f6f5ff);
+}
+
+.employee-page .salary-box span {
+    color: #7669d9;
+    font-size: 11px;
+}
+
+.employee-page .salary-box h2 {
+    font-size: 27px;
+    margin: 12px 0;
+}
+
+.employee-page .salary-box p {
+    color: #7e8498;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.employee-page .action-link {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 8px;
+    background: #6258df;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.employee-page .muted {
+    color: #8990a5;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+@media (max-width: 1100px) {
+    .employee-page .cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .employee-page .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .employee-page .hero-card {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 600px) {
+    .employee-page .page-heading h1 {
+        font-size: 21px;
+    }
+
+    .employee-page .page-heading {
+        margin-bottom: 18px;
+    }
+
+    .employee-page .cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .employee-page .info-card {
+        padding: 14px;
+    }
+
+    .employee-page .info-card h3 {
+        font-size: 18px;
+    }
+
+    .employee-page .hero-card {
+        padding: 19px;
+    }
+
+    .employee-page .hero-card h2 {
+        font-size: 18px;
+    }
+
+    .employee-page .hero-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 21px;
+    }
+
+    .employee-page .page-card {
+        padding: 16px;
+    }
+
+    .employee-page .detail-list {
+        grid-template-columns: 1fr;
+    }
+
+    .employee-page .profile-header {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 380px) {
+    .employee-page .cards-grid {
+        grid-template-columns: 1fr;
+    }
+}

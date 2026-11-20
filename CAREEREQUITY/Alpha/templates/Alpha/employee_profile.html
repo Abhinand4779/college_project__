@@ -1,0 +1,17 @@
+{% extends "Alpha/base_dashboard.html" %}
+
+{% block content %}
+<div class="page-content">
+    <h1>My Profile</h1>
+    <p>View your employee information.</p>
+
+    <div class="dashboard-card">
+        <h3>Personal Information</h3>
+        <p>Name: {{ request.user.account_profile.full_name }}</p>
+        <p>Employee ID: {{ request.user.account_profile.employee_id }}</p>
+        <p>Email: {{ request.user.email }}</p>
+        <p>Department: {{ request.user.account_profile.department }}</p>
+        <p>Designation: {{ request.user.account_profile.designation }}</p>
+    </div>
+</div>
+{% endblock %}

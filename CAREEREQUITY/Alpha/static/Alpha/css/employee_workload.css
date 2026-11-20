@@ -1,0 +1,266 @@
+
+.workload-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.workload-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.workload-heading h1 {
+    font-size: 25px;
+    margin: 0 0 7px;
+}
+
+.workload-heading p {
+    color: #777;
+    margin: 0;
+}
+
+.workload-total {
+    background: #6258df;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    min-width: 115px;
+}
+
+.workload-total strong {
+    font-size: 26px;
+    margin-top: 5px;
+}
+
+.workload-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.workload-stat {
+    background: white;
+    border: 1px solid #ececf3;
+    padding: 20px;
+    border-radius: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.workload-stat span {
+    color: #777;
+    font-size: 13px;
+}
+
+.workload-stat strong {
+    font-size: 25px;
+    color: #29263c;
+}
+
+.workload-stat.pending {
+    border-left: 4px solid #e5a23b;
+}
+
+.workload-stat.progress {
+    border-left: 4px solid #6258df;
+}
+
+.workload-stat.completed {
+    border-left: 4px solid #20a879;
+}
+
+.assigned-tasks-section {
+    background: #fff;
+    padding: 22px;
+    border: 1px solid #ececf3;
+    border-radius: 14px;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-heading h2 {
+    font-size: 19px;
+    margin: 0;
+}
+
+.section-heading span {
+    color: #777;
+    font-size: 13px;
+}
+
+.employee-task-card {
+    border: 1px solid #e9e8f1;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 17px;
+}
+
+.task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.task-card-header h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.task-card-header p {
+    color: #777;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.task-status {
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    white-space: nowrap;
+    background: #fff2d9;
+    color: #9a6816;
+}
+
+.task-status.inprogress {
+    background: #eeeaff;
+    color: #6258df;
+}
+
+.task-status.completed {
+    background: #e3f8ee;
+    color: #16845e;
+}
+
+.task-information {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    padding: 20px 0;
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.task-information div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.task-information small {
+    color: #888;
+}
+
+.task-information strong {
+    font-size: 14px;
+}
+
+.task-update-section {
+    border-top: 1px solid #eee;
+    padding-top: 18px;
+}
+
+.task-update-section form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.task-update-section label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.task-update-section select,
+.task-update-section input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-width: 110px;
+    max-width: 100%;
+}
+
+.task-update-section button {
+    padding: 11px 17px;
+    border: none;
+    border-radius: 8px;
+    background: #6258df;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.task-update-section button:hover {
+    background: #4e45c5;
+}
+
+.empty-workload {
+    text-align: center;
+    padding: 45px 15px;
+    color: #777;
+}
+
+.empty-workload h3 {
+    color: #29263c;
+}
+
+@media (max-width: 800px) {
+    .workload-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .task-information {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .workload-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .workload-total {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .workload-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .assigned-tasks-section {
+        padding: 14px;
+    }
+
+    .task-card-header {
+        flex-direction: column;
+    }
+
+    .task-update-section form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .task-update-section select,
+    .task-update-section input,
+    .task-update-section button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

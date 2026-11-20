@@ -1,0 +1,159 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}CareerEquity AI{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'Alpha/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'Alpha/css/employee_pages.css' %}">
+    <link rel="stylesheet" href="{% static 'Alpha/css/employee_skills.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">CE</div>
+            <div>
+                <h2>CareerEquity</h2>
+                <small>AI Platform</small>
+            </div>
+        </div>
+
+        <div class="user-card">
+            <div class="avatar">
+                {{ request.user.account_profile.full_name|first|upper }}
+            </div>
+
+            <div>
+                <strong>{{ request.user.account_profile.full_name }}</strong>
+                <small>{{ request.user.account_profile.role }}</small>
+            </div>
+        </div>
+
+        <p class="menu-heading">MAIN MENU</p>
+
+        <nav class="sidebar-menu">
+
+            <a href="{% url 'dashboard' %}"
+               class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                Dashboard
+            </a>
+
+            {% if request.user.account_profile.role == "HR Manager/Admin" %}
+
+                <a href="{% url 'create_employee' %}"
+                   class="{% if request.resolver_match.url_name == 'create_employee' %}active{% endif %}">
+                    Create Employee
+                </a>
+
+                <a href="{% url 'hr_task_assignment' %}"
+                   class="{% if request.resolver_match.url_name == 'hr_task_assignment' %}active{% endif %}">
+                    Task Assignment
+                </a>
+
+            {% elif request.user.account_profile.role == "Employee" %}
+
+                <a href="{% url 'employee_profile' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_profile' %}active{% endif %}">
+                    My Profile
+                </a>
+
+                <a href="{% url 'employee_skills' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_skills' %}active{% endif %}">
+                    My Skills
+                </a>
+
+                <a href="{% url 'employee_workload' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_workload' %}active{% endif %}">
+                    My Workload
+                </a>
+
+                <a href="{% url 'employee_salary' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_salary' %}active{% endif %}">
+                    Salary Insights
+                </a>
+
+                <a href="{% url 'employee_career' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_career' %}active{% endif %}">
+                    Career Development
+                </a>
+
+                <a href="{% url 'employee_progress' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_progress' %}active{% endif %}">
+                    My Progress
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="{% url 'logout_page' %}" class="logout-link">
+                Logout
+            </a>
+        </div>
+
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <main class="main-area">
+
+        <header class="topbar">
+
+            <button class="menu-toggle"
+                    id="menuToggle"
+                    type="button"
+                    aria-label="Open navigation menu"
+                    aria-expanded="false">
+                ☰
+            </button>
+
+            <div>
+                <h2>
+                    {% block page_heading %}
+                        {{ request.user.account_profile.role }} Dashboard
+                    {% endblock %}
+                </h2>
+
+                <p>
+                    {% block page_subtitle %}
+                        Welcome to your CareerEquity workspace
+                    {% endblock %}
+                </p>
+            </div>
+
+            <div class="online-status">
+                <span></span> Online
+            </div>
+
+        </header>
+
+        <section class="page-content">
+            {% block content %}
+            {% endblock %}
+        </section>
+
+        <footer class="footer">
+            © {% now "Y" %} CareerEquity AI. All rights reserved.
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="{% static 'Alpha/js/dashboard.js' %}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

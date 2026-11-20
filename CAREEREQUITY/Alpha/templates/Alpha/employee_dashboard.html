@@ -1,0 +1,267 @@
+
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Employee Dashboard | CareerEquity AI{% endblock %}
+{% block page_heading %}Employee Dashboard{% endblock %}
+
+{% block sidebar_links %}
+<nav class="sidebar-menu">
+
+    <a href="{% url 'dashboard' %}">
+        Dashboard
+    </a>
+
+    <a href="{% url 'employee_profile' %}">
+        My Profile
+    </a>
+
+    <a href="{% url 'employee_skills' %}">
+        My Skills
+    </a>
+
+    <a href="{% url 'employee_workload' %}">
+        My Workload
+    </a>
+
+    <a href="{% url 'employee_salary' %}">
+        Salary Insights
+    </a>
+
+    <a href="{% url 'employee_career' %}">
+        Career Development
+    </a>
+
+    <a href="{% url 'employee_progress' %}">
+        My Progress
+    </a>
+
+    <a href="{% url 'logout_page' %}">
+        Logout
+    </a>
+
+</nav>
+{% endblock %}
+
+{% block content %}
+
+<section id="overview">
+    <div class="welcome-section employee-welcome">
+        <div>
+            <span class="eyebrow">EMPLOYEE WORKSPACE</span>
+            <h1>Welcome, {{ profile.full_name }}!</h1>
+            <p>Understand your workload, explore your skills and plan your career growth.</p>
+        </div>
+        <div class="welcome-icon">✦</div>
+    </div>
+
+    <div class="section-heading">
+        <div>
+            <h2>Your Overview</h2>
+            <p>A quick look at your professional journey</p>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon purple">✓</div>
+            <p>Assigned Tasks</p>
+            <h2>12</h2>
+            <span class="stat-note">Sample task count</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon blue">✧</div>
+            <p>Skills Added</p>
+            <h2>08</h2>
+            <span class="stat-note">Profile skills</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon orange">◷</div>
+            <p>Workload Status</p>
+            <h2>Balanced</h2>
+            <span class="stat-note">Illustrative status</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon green">▣</div>
+            <p>Learning Goals</p>
+            <h2>04</h2>
+            <span class="stat-note">Sample development goals</span>
+        </div>
+    </div>
+</section>
+
+<section class="content-grid section-panel">
+
+    <div class="panel" id="profile">
+        <div class="panel-heading">
+            <div>
+                <h3>My Professional Profile</h3>
+                <p>Your employment information</p>
+            </div>
+            <span class="small-tag">Profile</span>
+        </div>
+
+        <div class="profile-details">
+            <div class="large-avatar">{{ profile.full_name|first|upper }}</div>
+            <h2>{{ profile.full_name }}</h2>
+            <p>{{ profile.designation|default:"Designation not added" }}</p>
+
+            <div class="detail-row">
+                <span>Employee ID</span>
+                <strong>{{ profile.employee_id|default:"Not added" }}</strong>
+            </div>
+            <div class="detail-row">
+                <span>Department</span>
+                <strong>{{ profile.department|default:"Not added" }}</strong>
+            </div>
+            <div class="detail-row">
+                <span>Organization</span>
+                <strong>{{ profile.organization|default:"Not added" }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" id="workload">
+        <div class="panel-heading">
+            <div>
+                <h3>My Workload Analysis</h3>
+                <p>Personal workload overview</p>
+            </div>
+            <span class="ai-tag">AI</span>
+        </div>
+
+        <div class="workload-score">
+            <div class="score-circle">
+                <div>
+                    <strong>72%</strong>
+                    <span>Sample score</span>
+                </div>
+            </div>
+            <div>
+                <h3>Workload Overview</h3>
+                <p>This is a sample visualization. Actual analysis will use your assigned tasks and workload records.</p>
+            </div>
+        </div>
+
+        <div class="progress-label">
+            <span>Task completion</span>
+            <strong>70%</strong>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" style="width:70%"></div>
+        </div>
+    </div>
+
+</section>
+
+<section class="panel section-panel" id="skills">
+    <div class="panel-heading">
+        <div>
+            <h3>My Skills</h3>
+            <p>Skills and qualifications in your professional profile</p>
+        </div>
+    </div>
+
+    <div class="skills-list">
+        <span class="skill-chip">Python</span>
+        <span class="skill-chip">Java</span>
+        <span class="skill-chip">SQL</span>
+        <span class="skill-chip">HTML & CSS</span>
+        <span class="skill-chip">Communication</span>
+        <span class="skill-chip">Problem Solving</span>
+    </div>
+    <p class="muted-text">These are sample skills for the design. You can connect this section to an employee skills database later.</p>
+</section>
+
+<section class="content-grid section-panel" id="salary">
+
+    <div class="panel">
+        <div class="panel-heading">
+            <div>
+                <h3>My Salary Insights</h3>
+                <p>Estimated compensation information</p>
+            </div>
+            <span class="ai-tag">AI</span>
+        </div>
+
+        <div class="salary-highlight">
+            <span>Personal salary estimation</span>
+            <h2>Salary Estimate</h2>
+            <p>Your estimated salary range will be displayed here after the prediction model is connected.</p>
+            <p class="muted-text">Estimates depend on factors such as role, experience, skills and relevant salary data.</p>
+        </div>
+    </div>
+
+    <div class="panel" id="career">
+        <div class="panel-heading">
+            <div>
+                <h3>Skill Gap Analysis</h3>
+                <p>Prepare for your target position</p>
+            </div>
+            <span class="ai-tag">AI</span>
+        </div>
+
+        <div class="career-target">
+            <span>Suggested target position</span>
+            <h3>Senior Software Developer</h3>
+            <p>Select a target role to identify the skills and qualifications you may need to develop.</p>
+        </div>
+
+        <div class="gap-item">
+            <span>Advanced Python</span>
+            <span class="pill warning">To improve</span>
+        </div>
+        <div class="gap-item">
+            <span>System Design</span>
+            <span class="pill info">Learning goal</span>
+        </div>
+        <div class="gap-item">
+            <span>Database Management</span>
+            <span class="pill success">Added skill</span>
+        </div>
+    </div>
+
+</section>
+
+<section class="panel section-panel" id="progress">
+    <div class="panel-heading">
+        <div>
+            <h3>My Development Roadmap</h3>
+            <p>Example learning plan for career growth</p>
+        </div>
+    </div>
+
+    <div class="roadmap">
+        <div class="roadmap-item completed">
+            <div class="roadmap-marker">✓</div>
+            <div>
+                <h4>Build programming fundamentals</h4>
+                <p>Strengthen core programming concepts</p>
+                <span class="pill success">Completed</span>
+            </div>
+        </div>
+
+        <div class="roadmap-item current">
+            <div class="roadmap-marker">2</div>
+            <div>
+                <h4>Improve database skills</h4>
+                <p>Practice SQL and database design</p>
+                <span class="pill info">In progress</span>
+            </div>
+        </div>
+
+        <div class="roadmap-item">
+            <div class="roadmap-marker">3</div>
+            <div>
+                <h4>Learn advanced development</h4>
+                <p>Explore system design and application development</p>
+                <span class="pill warning">Upcoming</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+

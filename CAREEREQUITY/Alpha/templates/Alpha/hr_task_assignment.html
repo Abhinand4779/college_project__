@@ -1,0 +1,195 @@
+
+{% extends 'Alpha/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Task Assignment | CareerEquity AI{% endblock %}
+{% block page_heading %}Task Assignment{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Alpha/css/hr_task_assignment.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="hr-task-page">
+
+    <div class="task-page-heading">
+        <div>
+            <span class="task-eyebrow">WORKFORCE MANAGEMENT</span>
+            <h1>Task Assignment</h1>
+            <p>Create tasks and distribute work among employees.</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="task-message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="task-assignment-grid">
+
+        <!-- CREATE TASK FORM -->
+
+        <section class="task-panel">
+
+            <div class="task-panel-heading">
+                <div class="task-panel-icon">+</div>
+                <div>
+                    <h2>Create New Task</h2>
+                    <p>Enter task details and assign an employee.</p>
+                </div>
+            </div>
+
+            <form method="POST" class="task-form">
+                {% csrf_token %}
+
+                <div class="task-form-group">
+                    <label>Task Title</label>
+                    <input type="text"
+                           name="title"
+                           placeholder="Enter task title"
+                           maxlength="200"
+                           required>
+                </div>
+
+                <div class="task-form-group">
+                    <label>Task Description</label>
+                    <textarea name="description"
+                              rows="4"
+                              placeholder="Describe the task..."></textarea>
+                </div>
+
+                <div class="task-form-group">
+                    <label>Assign Employee</label>
+                    <select name="employee" required>
+                        <option value="">Select employee</option>
+
+                        {% for employee in employees %}
+                            <option value="{{ employee.id }}">
+                                {{ employee.user.get_full_name|default:employee.user.username }}
+                                ({{ employee.employee_id }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="task-form-row">
+
+                    <div class="task-form-group">
+                        <label>Complexity</label>
+                        <select name="complexity" required>
+                            <option value="">Select</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+
+                    <div class="task-form-group">
+                        <label>Estimated Hours</label>
+                        <input type="number"
+                               name="estimated_hours"
+                               min="0.25"
+                               max="1000"
+                               step="0.25"
+                               placeholder="Example: 8"
+                               required>
+                    </div>
+
+                </div>
+
+                <div class="task-form-group">
+                    <label>Deadline</label>
+                    <input type="date" name="deadline">
+                </div>
+
+                <button type="submit" class="task-submit-btn">
+                    Create and Assign Task
+                </button>
+
+            </form>
+
+        </section>
+
+        <!-- ASSIGNED TASKS -->
+
+        <section class="task-panel task-list-panel">
+
+            <div class="task-panel-heading">
+                <div>
+                    <h2>Assigned Tasks</h2>
+                    <p>Overview of tasks assigned to employees.</p>
+                </div>
+
+                <span class="task-count">{{ assignments|length }} Tasks</span>
+            </div>
+
+            {% if assignments %}
+
+                <div class="assigned-task-list">
+
+                    {% for assignment in assignments %}
+
+                        <div class="assigned-task-card">
+
+                            <div class="assigned-task-top">
+                                <h3>{{ assignment.task.title }}</h3>
+
+                                <span class="task-status
+                                    {{ assignment.status|lower|cut:' ' }}">
+                                    {{ assignment.status }}
+                                </span>
+                            </div>
+
+                            <p class="assigned-task-description">
+                                {{ assignment.task.description|default:"No description provided." }}
+                            </p>
+
+                            <div class="assigned-task-meta">
+                                <span>
+                                    <strong>Employee:</strong>
+                                    {{ assignment.employee.user.get_full_name|default:assignment.employee.user.username }}
+                                </span>
+
+                                <span>
+                                    <strong>Complexity:</strong>
+                                    {{ assignment.task.complexity }}
+                                </span>
+
+                                <span>
+                                    <strong>Hours:</strong>
+                                    {{ assignment.task.estimated_hours }}
+                                </span>
+
+                                <span>
+                                    <strong>Deadline:</strong>
+                                    {{ assignment.task.deadline|default:"Not set" }}
+                                </span>
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="task-empty">
+                    <div>✦</div>
+                    <h3>No Tasks Assigned</h3>
+                    <p>Create your first task using the form.</p>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+</div>
+
+{% endblock %}

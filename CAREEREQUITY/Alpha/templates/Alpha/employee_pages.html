@@ -1,0 +1,537 @@
+
+{% extends "Alpha/base_dashboard.html" %}
+
+{% block content %}
+
+<div class="employee-page">
+
+    {% if page == "profile" %}
+
+    <div class="page-heading">
+        <div>
+            <div class="eyebrow">MY ACCOUNT</div>
+            <h1>My Profile</h1>
+            <p>View your professional information and employment details.</p>
+        </div>
+        <span class="page-date">Employee Profile</span>
+    </div>
+
+    {% if employee %}
+    <div class="page-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ account.full_name|first|upper }}
+            </div>
+            <div>
+                <h2>{{ account.full_name }}</h2>
+                <p>{{ employee.position.title }} · {{ employee.department.name }}</p>
+                <span class="status-pill success">{{ employee.employment_status }}</span>
+            </div>
+        </div>
+
+        <div class="card-heading">
+            <h3>Personal and Employment Details</h3>
+        </div>
+
+        <div class="detail-list">
+            <div class="detail-item">
+                <span>Full Name</span>
+                <strong>{{ account.full_name }}</strong>
+            </div>
+            <div class="detail-item">
+                <span>Employee ID</span>
+                <strong>{{ employee.employee_id }}</strong>
+            </div>
+            <div class="detail-item">
+                <span>Email Address</span>
+                <strong>{{ request.user.email|default:"Not provided" }}</strong>
+            </div>
+            <div class="detail-item">
+                <span>Department</span>
+                <strong>{{ employee.department.name }}</strong>
+            </div>
+            <div class="detail-item">
+                <span>Job Position</span>
+                <strong>{{ employee.position.title }}</strong>
+            </div>
+            <div class="detail-item">
+                <span>Job Level</span>
+                <strong>{{ employee.position.job_level }}</strong>
+            </div>
+            <div class="detail-item">
+                <span>Experience</span>
+                <strong>{{ employee.experience_years }} years</strong>
+            </div>
+            <div class="detail-item">
+                <span>Joining Date</span>
+                <strong>{{ employee.joining_date|default:"Not provided" }}</strong>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="page-card">
+        <div class="empty-state">
+            <strong>Employee profile not available</strong>
+            Please contact HR to complete your employee profile.
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% elif page == "skills" %}
+
+    <div class="page-heading">
+        <div>
+            <div class="eyebrow">PROFESSIONAL DEVELOPMENT</div>
+            <h1>My Skills</h1>
+            <p>Review your current skills and proficiency levels.</p>
+        </div>
+        <span class="page-date">Skills Overview</span>
+    </div>
+
+    <div class="hero-card">
+        <div>
+            <h2>Your skills build your future.</h2>
+            <p>Track your professional abilities and identify areas where further learning may help your career development.</p>
+        </div>
+        <div class="hero-icon">✦</div>
+    </div>
+
+    <div class="cards-grid">
+        <div class="info-card">
+            <div class="card-icon">✧</div>
+            <small>Total Skills</small>
+            <h3>{{ skills|length }}</h3>
+            <p>Skills in your profile</p>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">✓</div>
+            <small>Department</small>
+            <h3 style="font-size:16px;">
+                {% if employee %}{{ employee.department.name }}{% else %}Not set{% endif %}
+            </h3>
+            <p>Your current department</p>
+        </div>
+    </div>
+
+    <div class="page-card">
+        <div class="card-heading">
+            <div>
+                <h3>My Skill Set</h3>
+                <p>Your recorded professional skills and proficiency.</p>
+            </div>
+        </div>
+
+        {% if skills %}
+            {% for item in skills %}
+            <div class="skill-row">
+                <div class="skill-row-top">
+                    <strong>{{ item.skill.name }}</strong>
+                    <span>{{ item.proficiency }}</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill"
+                         style="width:{% if item.proficiency == 'Beginner' %}25{% elif item.proficiency == 'Intermediate' %}50{% elif item.proficiency == 'Advanced' %}75{% else %}100{% endif %}%;">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <strong>No skills added yet</strong>
+                Your HR administrator can add skills to your employee profile.
+            </div>
+        {% endif %}
+    </div>
+
+
+    {% elif page == "workload" %}
+
+    <div class="page-heading">
+        <div>
+            <div class="eyebrow">TASK MANAGEMENT</div>
+            <h1>My Workload</h1>
+            <p>View assigned tasks, completion status and recorded working hours.</p>
+        </div>
+        <span class="page-date">Work Overview</span>
+    </div>
+
+    <div class="hero-card">
+        <div>
+            <h2>Stay organised. Track your progress.</h2>
+            <p>Keep track of assigned responsibilities and completed tasks in one place.</p>
+        </div>
+        <div class="hero-icon">▤</div>
+    </div>
+
+    <div class="cards-grid">
+        <div class="info-card">
+            <div class="card-icon">▣</div>
+            <small>Total Tasks</small>
+            <h3>{{ total_tasks }}</h3>
+            <p>Tasks assigned to you</p>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">✓</div>
+            <small>Completed</small>
+            <h3>{{ completed_tasks }}</h3>
+            <p>Completed assignments</p>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">◷</div>
+            <small>Pending</small>
+            <h3>{{ pending_tasks }}</h3>
+            <p>Tasks awaiting completion</p>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">◴</div>
+            <small>Recorded Hours</small>
+            <h3>{{ total_hours|floatformat:1 }}</h3>
+            <p>Hours recorded in assignments</p>
+        </div>
+    </div>
+
+    <div class="page-card">
+        <div class="card-heading">
+            <div>
+                <h3>Assigned Tasks</h3>
+                <p>Latest task assignments and their current status.</p>
+            </div>
+        </div>
+
+        {% if assignments %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Complexity</th>
+                        <th>Estimated Hours</th>
+                        <th>Actual Hours</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assignments %}
+                    <tr>
+                        <td><strong>{{ item.task.title }}</strong></td>
+                        <td>{{ item.task.complexity }}</td>
+                        <td>{{ item.task.estimated_hours }}</td>
+                        <td>{{ item.actual_hours }}</td>
+                        <td>
+                            <span class="status-pill
+                                {% if item.status == 'Completed' %}success
+                                {% elif item.status == 'In Progress' %}info
+                                {% else %}warning{% endif %}">
+                                {{ item.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <strong>No tasks assigned</strong>
+            Your assigned tasks will appear here when HR adds them.
+        </div>
+        {% endif %}
+    </div>
+
+
+    {% elif page == "salary" %}
+
+    <div class="page-heading">
+        <div>
+            <div class="eyebrow">COMPENSATION OVERVIEW</div>
+            <h1>Salary Insights</h1>
+            <p>View your recorded salary information and position salary range.</p>
+        </div>
+        <span class="page-date">Salary Overview</span>
+    </div>
+
+    {% if salary %}
+    <div class="salary-box">
+        <span>Latest Recorded Salary</span>
+        <h2>₹{{ salary.salary_amount|floatformat:2 }}</h2>
+        <p>Effective date: {{ salary.effective_date }}</p>
+    </div>
+    {% else %}
+    <div class="salary-box">
+        <span>Salary Information</span>
+        <h2>Not available</h2>
+        <p>Your salary information has not yet been recorded by HR.</p>
+    </div>
+    {% endif %}
+
+    {% if employee %}
+    <div class="content-grid" style="margin-top:20px;">
+        <div class="page-card">
+            <div class="card-heading">
+                <h3>Your Position</h3>
+            </div>
+            <div class="detail-list">
+                <div class="detail-item">
+                    <span>Department</span>
+                    <strong>{{ employee.department.name }}</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Position</span>
+                    <strong>{{ employee.position.title }}</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Minimum Position Salary</span>
+                    <strong>
+                        {% if employee.position.minimum_salary %}
+                            ₹{{ employee.position.minimum_salary|floatformat:2 }}
+                        {% else %}Not provided{% endif %}
+                    </strong>
+                </div>
+                <div class="detail-item">
+                    <span>Maximum Position Salary</span>
+                    <strong>
+                        {% if employee.position.maximum_salary %}
+                            ₹{{ employee.position.maximum_salary|floatformat:2 }}
+                        {% else %}Not provided{% endif %}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-card">
+            <div class="card-heading">
+                <h3>Salary Information</h3>
+            </div>
+            <p class="muted">
+                The position salary range is the range recorded by your organisation.
+                It is not a guaranteed salary or an AI-generated prediction.
+            </p>
+            <div class="notice">
+                Salary comparisons and AI estimates should be treated as informational
+                insights, not as automatic employment decisions.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% elif page == "career" %}
+
+    <div class="page-heading">
+        <div>
+            <div class="eyebrow">YOUR FUTURE</div>
+            <h1>Career Development</h1>
+            <p>Explore learning goals and possible professional development steps.</p>
+        </div>
+        <span class="page-date">Career Planner</span>
+    </div>
+
+    <div class="hero-card">
+        <div>
+            <h2>Build skills for your next opportunity.</h2>
+            <p>Use your current role, experience and skill set to plan your next learning goals.</p>
+        </div>
+        <div class="hero-icon">↗</div>
+    </div>
+
+    {% if employee %}
+    <div class="content-grid">
+        <div class="page-card">
+            <div class="card-heading">
+                <h3>Current Career Position</h3>
+            </div>
+            <div class="detail-list">
+                <div class="detail-item">
+                    <span>Current Role</span>
+                    <strong>{{ employee.position.title }}</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Department</span>
+                    <strong>{{ employee.department.name }}</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Experience</span>
+                    <strong>{{ employee.experience_years }} years</strong>
+                </div>
+                <div class="detail-item">
+                    <span>Current Job Level</span>
+                    <strong>{{ employee.position.job_level }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-card">
+            <div class="card-heading">
+                <h3>Development Focus</h3>
+            </div>
+            <p class="muted">
+                Continue developing role-related skills, gaining practical experience,
+                and discussing career goals with your manager.
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="page-card">
+        <div class="card-heading">
+            <h3>Suggested Development Roadmap</h3>
+        </div>
+
+        <div class="roadmap">
+            <div class="roadmap-item">
+                <div class="roadmap-number">01</div>
+                <div>
+                    <h4>Review Your Current Skills</h4>
+                    <p>Identify your strengths and the skills you want to improve.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-number">02</div>
+                <div>
+                    <h4>Choose Learning Goals</h4>
+                    <p>Select relevant courses, training and practical learning activities.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-number">03</div>
+                <div>
+                    <h4>Gain Practical Experience</h4>
+                    <p>Apply new skills through suitable projects and responsibilities.</p>
+                </div>
+            </div>
+            <div class="roadmap-item">
+                <div class="roadmap-number">04</div>
+                <div>
+                    <h4>Review Your Career Goals</h4>
+                    <p>Discuss development opportunities and progress with your manager.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% elif page == "progress" %}
+
+    <div class="page-heading">
+        <div>
+            <div class="eyebrow">PERFORMANCE OVERVIEW</div>
+            <h1>My Progress</h1>
+            <p>Review your task completion and professional development activity.</p>
+        </div>
+        <span class="page-date">Progress Overview</span>
+    </div>
+
+    <div class="hero-card">
+        <div>
+            <h2>Every completed task moves you forward.</h2>
+            <p>Review your recorded assignments and monitor your progress over time.</p>
+        </div>
+        <div class="hero-icon">✓</div>
+    </div>
+
+    <div class="cards-grid">
+        <div class="info-card">
+            <div class="card-icon">▣</div>
+            <small>Total Assigned Tasks</small>
+            <h3>{{ total_tasks }}</h3>
+            <p>All recorded assignments</p>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">✓</div>
+            <small>Completed Tasks</small>
+            <h3>{{ completed_tasks }}</h3>
+            <p>Assignments marked completed</p>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">◷</div>
+            <small>Pending Tasks</small>
+            <h3>{{ pending_tasks }}</h3>
+            <p>Assignments not yet completed</p>
+        </div>
+        <div class="info-card">
+            <div class="card-icon">◴</div>
+            <small>Recorded Hours</small>
+            <h3>{{ total_hours|floatformat:1 }}</h3>
+            <p>Recorded assignment hours</p>
+        </div>
+    </div>
+
+    <div class="page-card">
+        <div class="card-heading">
+            <div>
+                <h3>Task Completion</h3>
+                <p>Based on the task statuses currently recorded in the system.</p>
+            </div>
+        </div>
+
+        {% if total_tasks %}
+            <div class="skill-row">
+                <div class="skill-row-top">
+                    <strong>Completed assignments</strong>
+                    <span>
+                        {% widthratio completed_tasks total_tasks 100 %}%
+                    </span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill"
+                         style="width:{% widthratio completed_tasks total_tasks 100 %}%;">
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <strong>No progress data yet</strong>
+                Your progress will appear after tasks are assigned.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="page-card">
+        <div class="card-heading">
+            <h3>Recent Activity</h3>
+        </div>
+
+        {% if assignments %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Assigned Date</th>
+                        <th>Recorded Hours</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assignments %}
+                    <tr>
+                        <td><strong>{{ item.task.title }}</strong></td>
+                        <td>{{ item.assigned_date }}</td>
+                        <td>{{ item.actual_hours }}</td>
+                        <td>
+                            <span class="status-pill
+                                {% if item.status == 'Completed' %}success
+                                {% elif item.status == 'In Progress' %}info
+                                {% else %}warning{% endif %}">
+                                {{ item.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <strong>No activity recorded</strong>
+            Your recent assignments will appear here.
+        </div>
+        {% endif %}
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

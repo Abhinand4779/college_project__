@@ -1,0 +1,883 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerEquity - HR Dashboard</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f6fc;
+    color: #252743;
+    overflow: hidden;
+}
+
+.app {
+    display: flex;
+    height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 245px;
+    background: #191b36;
+    color: white;
+    padding: 25px 15px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 35px;
+    padding: 0 8px;
+}
+
+.brand-icon {
+    background: #695ce8;
+    width: 43px;
+    height: 43px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: bold;
+}
+
+.brand h2 {
+    font-size: 17px;
+}
+
+.brand p {
+    color: #a9accb;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+.user {
+    background: #292c4b;
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.avatar {
+    background: #7569ec;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+}
+
+.user h4 {
+    font-size: 12px;
+}
+
+.user p {
+    font-size: 10px;
+    color: #b9bbd4;
+    margin-top: 5px;
+}
+
+.menu-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #9398bb;
+    margin: 0 10px 12px;
+}
+
+.navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.nav-btn {
+    padding: 13px 12px;
+    background: transparent;
+    color: #c1c4dc;
+    border: none;
+    text-align: left;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+    background: #373a62;
+    color: white;
+}
+
+.nav-btn.active {
+    border-left: 3px solid #9288ff;
+}
+
+.logout {
+    margin-top: auto;
+    padding: 12px;
+    color: #c1c4dc;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+/* MAIN */
+.main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: 75px;
+    min-height: 75px;
+    background: white;
+    border-bottom: 1px solid #e9eaf1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.topbar h2 {
+    font-size: 19px;
+}
+
+.topbar p {
+    color: #9298ad;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.online {
+    color: #20a77b;
+    font-size: 12px;
+}
+
+/* PAGE CONTAINER */
+.content {
+    flex: 1;
+    min-height: 0;
+    padding: 25px 30px 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.pages {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.page {
+    display: none;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.page.active {
+    display: block;
+}
+
+/* WELCOME */
+.welcome {
+    background: linear-gradient(110deg, #292b60, #695ce8);
+    color: white;
+    padding: 28px 30px;
+    border-radius: 15px;
+    margin-bottom: 23px;
+}
+
+.welcome small {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+}
+
+.welcome h1 {
+    font-size: 25px;
+    margin: 13px 0 8px;
+}
+
+.welcome p {
+    font-size: 12px;
+    color: #e2e0ff;
+}
+
+/* HEADINGS */
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.heading h2 {
+    font-size: 18px;
+}
+
+.heading p {
+    font-size: 11px;
+    color: #9298ad;
+    margin-top: 5px;
+}
+
+.tag {
+    background: #eeedff;
+    color: #6559e8;
+    padding: 9px 13px;
+    border-radius: 8px;
+    font-size: 10px;
+}
+
+/* STAT CARDS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #e9eaf1;
+    border-radius: 13px;
+    padding: 18px;
+}
+
+.card-icon {
+    width: 38px;
+    height: 38px;
+    background: #efedff;
+    color: #6559e8;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    margin-bottom: 13px;
+    font-size: 18px;
+}
+
+.card p {
+    color: #9298ad;
+    font-size: 11px;
+}
+
+.card h2 {
+    font-size: 25px;
+    margin: 8px 0;
+}
+
+.card small {
+    font-size: 10px;
+    color: #9298ad;
+}
+
+/* PANELS */
+.grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 17px;
+}
+
+.panel {
+    background: white;
+    border: 1px solid #e9eaf1;
+    border-radius: 13px;
+    padding: 20px;
+    margin-bottom: 17px;
+}
+
+.panel h3 {
+    font-size: 14px;
+    margin-bottom: 7px;
+}
+
+.subtitle {
+    color: #9298ad;
+    font-size: 10px;
+    margin-bottom: 18px;
+}
+
+/* CHART */
+.chart {
+    height: 170px;
+    display: flex;
+    align-items: end;
+    justify-content: space-around;
+    border-bottom: 1px solid #e9eaf1;
+}
+
+.bar-column {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: center;
+    gap: 7px;
+}
+
+.bar {
+    width: 34px;
+    background: #695ce8;
+    border-radius: 6px 6px 0 0;
+}
+
+.bar-column span {
+    font-size: 10px;
+    color: #9298ad;
+    margin-bottom: 7px;
+}
+
+/* INSIGHTS */
+.insight {
+    display: flex;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #eeeef4;
+}
+
+.insight-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: #efedff;
+    color: #6559e8;
+}
+
+.insight h4 {
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.insight p {
+    font-size: 10px;
+    color: #9298ad;
+}
+
+/* TABLE */
+.table-box {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+th, td {
+    padding: 14px 10px;
+    text-align: left;
+    border-bottom: 1px solid #eeeef4;
+}
+
+th {
+    color: #9298ad;
+    background: #fafaff;
+}
+
+.status {
+    background: #e4f8ef;
+    color: #15976d;
+    padding: 6px 9px;
+    border-radius: 15px;
+}
+
+/* LISTS */
+.list-item {
+    padding: 15px 5px;
+    border-bottom: 1px solid #eeeef4;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+}
+
+.list-item span {
+    color: #9298ad;
+    font-size: 10px;
+}
+
+/* PAGINATION */
+.pagination {
+    height: 55px;
+    min-height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #e7e8f0;
+    margin-top: 10px;
+}
+
+.pagination p {
+    color: #9298ad;
+    font-size: 11px;
+}
+
+.pagination button {
+    padding: 10px 15px;
+    border: 1px solid #e3e4ee;
+    background: white;
+    color: #252743;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.pagination button.next {
+    background: #6559e8;
+    color: white;
+    border-color: #6559e8;
+}
+
+.pagination button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+/* RESPONSIVE */
+@media(max-width: 900px) {
+    .sidebar {
+        width: 200px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 600px) {
+    body {
+        overflow: auto;
+    }
+
+    .app {
+        height: auto;
+        min-height: 100vh;
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .user, .menu-label {
+        display: none;
+    }
+
+    .brand {
+        margin-bottom: 15px;
+    }
+
+    .navigation {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .nav-btn {
+        white-space: nowrap;
+    }
+
+    .main {
+        min-height: 75vh;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .pages {
+        overflow: visible;
+    }
+
+    .page {
+        overflow: visible;
+    }
+
+    .topbar {
+        padding: 15px;
+    }
+
+    .welcome h1 {
+        font-size: 20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+
+    <div class="brand">
+        <div class="brand-icon">CE</div>
+        <div>
+            <h2>CareerEquity</h2>
+            <p>AI Platform</p>
+        </div>
+    </div>
+
+    <div class="user">
+        <div class="avatar">HR</div>
+        <div>
+            <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+            <p>HR Manager / Admin</p>
+        </div>
+    </div>
+
+    <div class="menu-label">MAIN MENU</div>
+
+    <nav class="navigation">
+        <button class="nav-btn active" data-page="0">▦ Dashboard</button>
+        <button class="nav-btn" data-page="1">♙ Employees</button>
+        <button class="nav-btn" data-page="2">▤ Departments</button>
+        <button class="nav-btn" data-page="3">▣ Job Positions</button>
+        <button class="nav-btn" data-page="4">◷ Workload Analysis</button>
+        <button class="nav-btn" data-page="5">₹ Salary Analysis</button>
+        <button class="nav-btn" data-page="6">AI Insights</button>
+    </nav>
+
+    <a href="{% url 'logout_page' %}" class="logout">↪ Logout</a>
+
+</aside>
+
+<main class="main">
+
+    <header class="topbar">
+        <div>
+            <h2 id="topTitle">HR Dashboard</h2>
+            <p>CareerEquity AI Workforce Management</p>
+        </div>
+        <div class="online">● Online</div>
+    </header>
+
+    <div class="content">
+
+    <div class="pages">
+
+        <!-- PAGE 1 -->
+        <section class="page active">
+            <div class="welcome">
+                <small>HR MANAGEMENT / OVERVIEW</small>
+                <h1>Welcome, {{ request.user.get_full_name|default:request.user.username }}!</h1>
+                <p>Monitor employee performance, workload distribution and salary insights.</p>
+            </div>
+
+            <div class="heading">
+                <div>
+                    <h2>Organization Overview</h2>
+                    <p>Quick summary of your organization</p>
+                </div>
+                <span class="tag">HR Workspace</span>
+            </div>
+
+            <div class="stats">
+                <div class="card">
+                    <div class="card-icon">♙</div>
+                    <p>Total Employees</p>
+                    <h2>248</h2>
+                    <small>Sample display value</small>
+                </div>
+                <div class="card">
+                    <div class="card-icon">▤</div>
+                    <p>Departments</p>
+                    <h2>12</h2>
+                    <small>Sample display value</small>
+                </div>
+                <div class="card">
+                    <div class="card-icon">◷</div>
+                    <p>Workload Alerts</p>
+                    <h2>08</h2>
+                    <small>Sample display value</small>
+                </div>
+                <div class="card">
+                    <div class="card-icon">₹</div>
+                    <p>Salary Reviews</p>
+                    <h2>16</h2>
+                    <small>Sample display value</small>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="panel">
+                    <h3>Workload Distribution</h3>
+                    <p class="subtitle">Illustrative department overview</p>
+                    <div class="chart">
+                        <div class="bar-column"><div class="bar" style="height:80%"></div><span>IT</span></div>
+                        <div class="bar-column"><div class="bar" style="height:55%;background:#38b9ed"></div><span>HR</span></div>
+                        <div class="bar-column"><div class="bar" style="height:65%;background:#20b58d"></div><span>Sales</span></div>
+                        <div class="bar-column"><div class="bar" style="height:45%;background:#f5a00b"></div><span>Finance</span></div>
+                        <div class="bar-column"><div class="bar" style="height:60%;background:#a78bfa"></div><span>Design</span></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>AI Highlights</h3>
+                    <p class="subtitle">Items for HR review</p>
+                    <div class="insight">
+                        <div class="insight-icon">!</div>
+                        <div><h4>Workload imbalance</h4><p>Review task distribution.</p></div>
+                    </div>
+                    <div class="insight">
+                        <div class="insight-icon">₹</div>
+                        <div><h4>Salary comparison</h4><p>Review compensation fairness.</p></div>
+                    </div>
+                    <div class="insight">
+                        <div class="insight-icon">✓</div>
+                        <div><h4>Skill development</h4><p>Identify training opportunities.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 2 -->
+        <section class="page">
+            <div class="heading">
+                <div><h2>Employee Management</h2><p>View employee information</p></div>
+                <span class="tag">Employees</span>
+            </div>
+
+            <div class="stats">
+                <div class="card"><div class="card-icon">♙</div><p>Total Employees</p><h2>248</h2></div>
+                <div class="card"><div class="card-icon">✓</div><p>Active Employees</p><h2>235</h2></div>
+                <div class="card"><div class="card-icon">＋</div><p>New Employees</p><h2>13</h2></div>
+                <div class="card"><div class="card-icon">▤</div><p>Departments</p><h2>12</h2></div>
+            </div>
+
+            <div class="panel">
+                <h3>Employee Records</h3>
+                <p class="subtitle">Illustrative records - connect to your database for live data</p>
+                <div class="table-box">
+                    <table>
+                        <tr><th>Employee ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Status</th></tr>
+                        <tr><td>EMP001</td><td>Arun Kumar</td><td>IT</td><td>Developer</td><td><span class="status">Active</span></td></tr>
+                        <tr><td>EMP002</td><td>Meera Nair</td><td>HR</td><td>HR Executive</td><td><span class="status">Active</span></td></tr>
+                        <tr><td>EMP003</td><td>Rahul Das</td><td>Finance</td><td>Analyst</td><td><span class="status">Active</span></td></tr>
+                        <tr><td>EMP004</td><td>Anjali P</td><td>Sales</td><td>Sales Executive</td><td><span class="status">Active</span></td></tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 3 -->
+        <section class="page">
+            <div class="heading">
+                <div><h2>Department Management</h2><p>Organization structure and departments</p></div>
+                <span class="tag">Departments</span>
+            </div>
+
+            <div class="stats">
+                <div class="card"><div class="card-icon">▤</div><p>Total Departments</p><h2>12</h2></div>
+                <div class="card"><div class="card-icon">♙</div><p>Total Employees</p><h2>248</h2></div>
+            </div>
+
+            <div class="panel">
+                <h3>Department Overview</h3>
+                <div class="list-item">Information Technology <span>65 Employees</span></div>
+                <div class="list-item">Human Resources <span>20 Employees</span></div>
+                <div class="list-item">Finance <span>35 Employees</span></div>
+                <div class="list-item">Sales and Marketing <span>55 Employees</span></div>
+                <div class="list-item">Design <span>28 Employees</span></div>
+                <div class="list-item">Operations <span>45 Employees</span></div>
+            </div>
+        </section>
+
+        <!-- PAGE 4 -->
+        <section class="page">
+            <div class="heading">
+                <div><h2>Job Positions</h2><p>Manage roles and job requirements</p></div>
+                <span class="tag">Positions</span>
+            </div>
+
+            <div class="stats">
+                <div class="card"><div class="card-icon">▣</div><p>Total Positions</p><h2>32</h2></div>
+                <div class="card"><div class="card-icon">＋</div><p>Open Positions</p><h2>08</h2></div>
+            </div>
+
+            <div class="panel">
+                <h3>Position Overview</h3>
+                <div class="list-item">Software Developer <span>IT</span></div>
+                <div class="list-item">Data Analyst <span>Analytics</span></div>
+                <div class="list-item">HR Executive <span>Human Resources</span></div>
+                <div class="list-item">Financial Analyst <span>Finance</span></div>
+                <div class="list-item">Marketing Manager <span>Marketing</span></div>
+            </div>
+        </section>
+
+        <!-- PAGE 5 -->
+        <section class="page">
+            <div class="heading">
+                <div><h2>Workload Analysis</h2><p>Monitor employee workload distribution</p></div>
+                <span class="tag">Workload</span>
+            </div>
+
+            <div class="stats">
+                <div class="card"><div class="card-icon">◷</div><p>Average Workload</p><h2>75%</h2></div>
+                <div class="card"><div class="card-icon">!</div><p>High Workload</p><h2>08</h2></div>
+                <div class="card"><div class="card-icon">✓</div><p>Balanced</p><h2>190</h2></div>
+                <div class="card"><div class="card-icon">↓</div><p>Low Workload</p><h2>50</h2></div>
+            </div>
+
+            <div class="panel">
+                <h3>Workload Monitoring</h3>
+                <p class="subtitle">Illustrative records</p>
+                <div class="list-item">Employee EMP001 <span>High workload - Review</span></div>
+                <div class="list-item">Employee EMP002 <span>Balanced workload</span></div>
+                <div class="list-item">Employee EMP003 <span>Balanced workload</span></div>
+                <div class="list-item">Employee EMP004 <span>Low workload - Review</span></div>
+            </div>
+        </section>
+
+        <!-- PAGE 6 -->
+        <section class="page">
+            <div class="heading">
+                <div><h2>Salary Analysis</h2><p>Review compensation and salary estimates</p></div>
+                <span class="tag">Compensation</span>
+            </div>
+
+            <div class="stats">
+                <div class="card"><div class="card-icon">₹</div><p>Salary Reviews</p><h2>16</h2></div>
+                <div class="card"><div class="card-icon">▤</div><p>Job Levels</p><h2>06</h2></div>
+            </div>
+
+            <div class="panel">
+                <h3>Salary Comparison</h3>
+                <p class="subtitle">Illustrative review categories</p>
+                <div class="list-item">Software Developer <span>Salary review required</span></div>
+                <div class="list-item">Data Analyst <span>Within estimated range</span></div>
+                <div class="list-item">HR Executive <span>Review compensation</span></div>
+                <div class="list-item">Financial Analyst <span>Within estimated range</span></div>
+            </div>
+        </section>
+
+        <!-- PAGE 7 -->
+        <section class="page">
+            <div class="heading">
+                <div><h2>AI Insights</h2><p>AI-supported workforce recommendations</p></div>
+                <span class="tag">AI Workspace</span>
+            </div>
+
+            <div class="panel">
+                <h3>AI Recommendations</h3>
+                <p class="subtitle">Recommendations for HR review</p>
+
+                <div class="insight">
+                    <div class="insight-icon">!</div>
+                    <div><h4>Workload Imbalance Detection</h4><p>Identify employees with uneven task allocation.</p></div>
+                </div>
+
+                <div class="insight">
+                    <div class="insight-icon">₹</div>
+                    <div><h4>Salary Fairness Analysis</h4><p>Compare compensation for similar roles and experience.</p></div>
+                </div>
+
+                <div class="insight">
+                    <div class="insight-icon">✓</div>
+                    <div><h4>Career Development</h4><p>Identify employee skill gaps and learning opportunities.</p></div>
+                </div>
+
+                <div class="insight">
+                    <div class="insight-icon">↗</div>
+                    <div><h4>Career Progression</h4><p>Explore career paths based on skills and experience.</p></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Decision Support</h3>
+                <p class="subtitle">AI recommendations should be reviewed by HR before employment or compensation decisions.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="pagination">
+        <p id="pageNumber">Page 1 of 7</p>
+        <div>
+            <button id="previous" disabled>← Previous</button>
+            <button class="next" id="next">Next →</button>
+        </div>
+    </footer>
+
+    </div>
+</main>
+</div>
+
+<script>
+const pages = document.querySelectorAll(".page");
+const navButtons = document.querySelectorAll(".nav-btn");
+const pageNumber = document.getElementById("pageNumber");
+const previous = document.getElementById("previous");
+const next = document.getElementById("next");
+const topTitle = document.getElementById("topTitle");
+
+const titles = [
+    "HR Dashboard",
+    "Employee Management",
+    "Department Management",
+    "Job Positions",
+    "Workload Analysis",
+    "Salary Analysis",
+    "AI Insights"
+];
+
+let currentPage = 0;
+
+function showPage(index) {
+    if (index < 0 || index >= pages.length) return;
+
+    currentPage = index;
+
+    pages.forEach((page, i) => {
+        page.classList.toggle("active", i === index);
+        page.scrollTop = 0;
+    });
+
+    navButtons.forEach((button, i) => {
+        button.classList.toggle("active", i === index);
+    });
+
+    pageNumber.textContent = `Page ${index + 1} of ${pages.length}`;
+    topTitle.textContent = titles[index];
+
+    previous.disabled = index === 0;
+    next.disabled = index === pages.length - 1;
+}
+
+navButtons.forEach((button, index) => {
+    button.addEventListener("click", () => showPage(index));
+});
+
+previous.addEventListener("click", () => showPage(currentPage - 1));
+next.addEventListener("click", () => showPage(currentPage + 1));
+
+showPage(0);
+</script>
+
+</body>
+</html>

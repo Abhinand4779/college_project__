@@ -1,0 +1,173 @@
+
+{% extends "Alpha/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}My Workload | CareerEquity AI{% endblock %}
+
+{% block page_heading %}My Workload{% endblock %}
+{% block page_subtitle %}View and manage your assigned tasks{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'Alpha/css/employee_workload.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="workload-page">
+
+    <div class="workload-heading">
+        <div>
+            <h1>My Assigned Tasks</h1>
+            <p>Track your tasks, deadlines and progress.</p>
+        </div>
+
+        <div class="workload-total">
+            <span>Total Tasks</span>
+            <strong>{{ total_tasks|default:0 }}</strong>
+        </div>
+    </div>
+
+    <div class="workload-stats">
+
+        <div class="workload-stat">
+            <span>Total Tasks</span>
+            <strong>{{ total_tasks|default:0 }}</strong>
+        </div>
+
+        <div class="workload-stat pending">
+            <span>Pending</span>
+            <strong>{{ pending_tasks|default:0 }}</strong>
+        </div>
+
+        <div class="workload-stat progress">
+            <span>In Progress</span>
+            <strong>{{ in_progress_tasks|default:0 }}</strong>
+        </div>
+
+        <div class="workload-stat completed">
+            <span>Completed</span>
+            <strong>{{ completed_tasks|default:0 }}</strong>
+        </div>
+
+    </div>
+
+    <div class="assigned-tasks-section">
+
+        <div class="section-heading">
+            <h2>Assigned Tasks</h2>
+            <span>{{ total_tasks|default:0 }} tasks</span>
+        </div>
+
+        {% for assignment in assignments %}
+
+            <div class="employee-task-card">
+
+                <div class="task-card-header">
+                    <div>
+                        <h3>{{ assignment.task.title }}</h3>
+                        <p>{{ assignment.task.description|default:"No description provided." }}</p>
+                    </div>
+
+                    <span class="task-status {{ assignment.status|lower|cut:' ' }}">
+                        {{ assignment.status }}
+                    </span>
+                </div>
+
+                <div class="task-information">
+
+                    <div>
+                        <small>Complexity</small>
+                        <strong>{{ assignment.task.complexity }}</strong>
+                    </div>
+
+                    <div>
+                        <small>Estimated Hours</small>
+                        <strong>{{ assignment.task.estimated_hours }} hrs</strong>
+                    </div>
+
+                    <div>
+                        <small>Actual Hours</small>
+                        <strong>{{ assignment.actual_hours }} hrs</strong>
+                    </div>
+
+                    <div>
+                        <small>Deadline</small>
+                        <strong>
+                            {% if assignment.task.deadline %}
+                                {{ assignment.task.deadline|date:"d M Y" }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                </div>
+
+                <div class="task-update-section">
+
+                    <form method="POST" action="{% url 'employee_workload' %}">
+                        {% csrf_token %}
+
+                        <input type="hidden" name="assignment_id"
+                               value="{{ assignment.id }}">
+
+                        <label for="status-{{ assignment.id }}">
+                            Update Task Status
+                        </label>
+
+                        <select name="status"
+                                id="status-{{ assignment.id }}">
+
+                            <option value="Pending"
+                                {% if assignment.status == "Pending" %}selected{% endif %}>
+                                Pending
+                            </option>
+
+                            <option value="In Progress"
+                                {% if assignment.status == "In Progress" %}selected{% endif %}>
+                                In Progress
+                            </option>
+
+                            <option value="Completed"
+                                {% if assignment.status == "Completed" %}selected{% endif %}>
+                                Completed
+                            </option>
+
+                        </select>
+
+                        <label for="hours-{{ assignment.id }}">
+                            Actual Hours
+                        </label>
+
+                        <input type="number"
+                               name="actual_hours"
+                               id="hours-{{ assignment.id }}"
+                               min="0"
+                               max="1000"
+                               step="0.25"
+                               value="{{ assignment.actual_hours }}">
+
+                        <button type="submit">
+                            Update Task
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <div class="empty-workload">
+                <h3>No Tasks Assigned Yet</h3>
+                <p>Your HR manager has not assigned any tasks to you yet.</p>
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
