@@ -21,7 +21,11 @@ from .models import (
     SalaryRecord,
     Task,
     TaskAssignment,
+    PositionRequirement,
 )
+from .ml_engine.workload_model import WorkloadAnalyzer
+from .ml_engine.salary_model import SalaryEquityPredictor
+from .ml_engine.career_engine import CareerProgressionAdvisor
 
 
 # =========================================================
@@ -121,21 +125,47 @@ def login_page(request):
     if request.method == "POST":
 
         role = request.POST.get("role", "").strip()
-        username = request.POST.get("username", "").strip()
+        login_input = request.POST.get("username", "").strip()
         password = request.POST.get("password", "")
 
-        if role == "HR Manager/Admin":
-            username = username.lower()
-
-        if not username or not password or not role:
+        if not login_input or not password or not role:
             messages.error(request, "Please fill in all login fields.")
             return render(request, "Alpha/login.html")
 
+        # 1. Try direct authentication by username
         user = authenticate(
             request,
-            username=username,
+            username=login_input,
             password=password
         )
+
+        # 2. Try lookup by email
+        if user is None:
+            user_by_email = User.objects.filter(email__iexact=login_input).first()
+            if user_by_email:
+                user = authenticate(
+                    request,
+                    username=user_by_email.username,
+                    password=password
+                )
+
+        # 3. Try lookup by employee_id (from AccountProfile or EmployeeProfile)
+        if user is None:
+            account_record = AccountProfile.objects.filter(employee_id__iexact=login_input).first()
+            if account_record:
+                user = authenticate(
+                    request,
+                    username=account_record.user.username,
+                    password=password
+                )
+            else:
+                emp_record = EmployeeProfile.objects.filter(employee_id__iexact=login_input).first()
+                if emp_record:
+                    user = authenticate(
+                        request,
+                        username=emp_record.user.username,
+                        password=password
+                    )
 
         if user is not None:
 
@@ -143,25 +173,26 @@ def login_page(request):
                 user=user
             ).first()
 
-            if account and account.role == role:
+            if not account:
+                messages.error(
+                    request,
+                    "Account profile not found for this user."
+                )
+                return render(request, "Alpha/login.html")
 
-                login(request, user)
+            # Successfully authenticate and log in directly
+            login(request, user)
 
-                if not request.POST.get("remember_me"):
-                    request.session.set_expiry(0)
+            if not request.POST.get("remember_me"):
+                request.session.set_expiry(0)
 
-                messages.success(request, "Login successful!")
-                return redirect("dashboard")
-
-            messages.error(
-                request,
-                "The selected role does not match this account."
-            )
+            messages.success(request, f"Welcome back, {account.full_name}!")
+            return redirect("dashboard")
 
         else:
             messages.error(
                 request,
-                "Invalid username or password."
+                "Invalid login credentials. Please check your username, email, or employee ID and password."
             )
 
     return render(request, "Alpha/login.html")
@@ -256,17 +287,99 @@ def dashboard(request):
         return redirect("login_page")
 
     if account.role == "HR Manager/Admin":
+        employees = get_hr_employees(request)
+        total_employees = employees.count()
+        active_employees = employees.filter(employment_status="Active").count()
+        departments = Department.objects.all().order_by("name")
+        positions = JobPosition.objects.select_related("department").all().order_by("department__name", "title")
+        assignments = get_hr_assignments(request)
+
+        # AI Workload Analysis for all employees
+        workload_analyses = []
+        workload_alerts_count = 0
+        dept_scores = {}
+        dept_counts = {}
+
+        for emp in employees:
+            analysis = WorkloadAnalyzer.analyze_employee(emp)
+            workload_analyses.append({
+                "employee": emp,
+                "analysis": analysis,
+            })
+            if analysis["is_burnout_risk"]:
+                workload_alerts_count += 1
+
+            dept_name = emp.department.name if emp.department else "General"
+            dept_scores[dept_name] = dept_scores.get(dept_name, 0) + analysis["workload_score"]
+            dept_counts[dept_name] = dept_counts.get(dept_name, 0) + 1
+
+        chart_labels = list(dept_scores.keys()) if dept_scores else ["Engineering", "Design", "QA", "HR", "Finance"]
+        chart_data = [
+            round(dept_scores[k] / dept_counts[k], 1) if dept_counts[k] > 0 else 50
+            for k in chart_labels
+        ] if dept_scores else [68, 52, 60, 42, 49]
+
+        # AI Salary Equity Audits
+        salary_audits = []
+        salary_reviews_count = 0
+        for emp in employees:
+            sal_profile = SalaryEquityPredictor.predict_salary_profile(emp)
+            salary_audits.append({
+                "employee": emp,
+                "profile": sal_profile,
+            })
+            if sal_profile["equity_status"] != "Fairly Compensated (Equitable)" and sal_profile["current_salary"]:
+                salary_reviews_count += 1
+
+        # AI Workload Imbalance Redistribution Suggestions
+        redistributions = WorkloadAnalyzer.suggest_redistribution(employees)
+
+        context = {
+            "profile": account,
+            "total_employees": total_employees,
+            "active_employees": active_employees,
+            "departments_count": departments.count(),
+            "departments": departments,
+            "positions": positions,
+            "employees": employees,
+            "workload_analyses": workload_analyses,
+            "workload_alerts_count": workload_alerts_count,
+            "salary_audits": salary_audits,
+            "salary_reviews_count": salary_reviews_count,
+            "redistributions": redistributions,
+            "chart_labels": chart_labels,
+            "chart_data": chart_data,
+            "assignments": assignments,
+        }
         return render(
             request,
             "Alpha/hr_dashboard.html",
-            {"profile": account}
+            context
         )
 
     if account.role == "Employee":
+        employee = EmployeeProfile.objects.filter(user=request.user).first()
+        if not employee:
+            messages.error(request, "Your employee profile has not been created.")
+            return render(request, "Alpha/employee_dashboard.html", {"profile": account})
+
+        workload_analysis = WorkloadAnalyzer.analyze_employee(employee)
+        career_readiness = CareerProgressionAdvisor.analyze_readiness(employee)
+        salary_profile = SalaryEquityPredictor.predict_salary_profile(employee)
+
+        context = {
+            "profile": account,
+            "employee": employee,
+            "workload_analysis": workload_analysis,
+            "career_readiness": career_readiness,
+            "salary_profile": salary_profile,
+            "total_tasks": employee.assignments.count(),
+            "total_skills": employee.employee_skills.count(),
+        }
         return render(
             request,
             "Alpha/employee_dashboard.html",
-            {"profile": account}
+            context
         )
 
     messages.error(request, "Invalid account role.")
@@ -476,13 +589,17 @@ def create_employee(request):
 def employee_profile(request):
 
     employee = get_employee(request)
+    skills = employee.employee_skills.select_related("skill").all().order_by("skill__name")
+    career_readiness = CareerProgressionAdvisor.analyze_readiness(employee)
 
     return render(
         request,
         "Alpha/employee_profile.html",
         {
             "employee": employee,
-            "profile": employee.user.account_profile
+            "profile": employee.user.account_profile,
+            "skills": skills,
+            "career_readiness": career_readiness,
         }
     )
 
@@ -646,6 +763,9 @@ def employee_workload(request):
     pending_tasks = assignments.filter(status="Pending").count()
     in_progress_tasks = assignments.filter(status="In Progress").count()
 
+    # AI Workload Imbalance & Burnout Analysis
+    workload_analysis = WorkloadAnalyzer.analyze_employee(employee)
+
     return render(
         request,
         "Alpha/employee_workload.html",
@@ -655,7 +775,8 @@ def employee_workload(request):
             "total_tasks": total_tasks,
             "completed_tasks": completed_tasks,
             "pending_tasks": pending_tasks,
-            "in_progress_tasks": in_progress_tasks
+            "in_progress_tasks": in_progress_tasks,
+            "workload_analysis": workload_analysis,
         }
     )
 
@@ -675,6 +796,9 @@ def employee_salary(request):
 
     latest_salary = salary_records.first()
 
+    # AI ML Salary Prediction and Same-Level Equity Model
+    salary_profile = SalaryEquityPredictor.predict_salary_profile(employee)
+
     return render(
         request,
         "Alpha/employee_salary.html",
@@ -682,7 +806,8 @@ def employee_salary(request):
             "employee": employee,
             "salary_records": salary_records,
             "latest_salary": latest_salary,
-            "position": employee.position
+            "position": employee.position,
+            "salary_profile": salary_profile,
         }
     )
 
@@ -696,18 +821,31 @@ def employee_career(request):
 
     employee = get_employee(request)
 
-    skills = EmployeeSkill.objects.filter(
-        employee=employee
-    ).select_related("skill").order_by("skill__name")
+    if request.method == "POST":
+        target_pos_id = request.POST.get("target_position")
+        if target_pos_id:
+            target_pos = JobPosition.objects.filter(id=target_pos_id).first()
+            if target_pos:
+                employee.target_position = target_pos
+                employee.save(update_fields=["target_position"])
+                messages.success(
+                    request,
+                    f"Target position set to {target_pos.title} ({target_pos.job_level})."
+                )
+
+    available_positions = JobPosition.objects.select_related("department").all().order_by("department__name", "title")
+    career_readiness = CareerProgressionAdvisor.analyze_readiness(employee)
 
     return render(
         request,
         "Alpha/employee_career.html",
         {
             "employee": employee,
-            "skills": skills,
             "position": employee.position,
-            "department": employee.department
+            "department": employee.department,
+            "target_position": employee.target_position,
+            "available_positions": available_positions,
+            "career_readiness": career_readiness,
         }
     )
 
@@ -735,11 +873,18 @@ def employee_progress(request):
         (assignment.actual_hours for assignment in assignments),
         Decimal("0")
     )
+    total_est_hours = sum(
+        (assignment.task.estimated_hours for assignment in assignments),
+        Decimal("0")
+    )
 
     completion_percentage = (
         round((completed_tasks / total_tasks) * 100, 1)
         if total_tasks else 0
     )
+
+    career_readiness = CareerProgressionAdvisor.analyze_readiness(employee)
+    workload_analysis = WorkloadAnalyzer.analyze_employee(employee)
 
     return render(
         request,
@@ -750,7 +895,10 @@ def employee_progress(request):
             "completed_tasks": completed_tasks,
             "total_tasks": total_tasks,
             "total_actual_hours": total_actual_hours,
-            "completion_percentage": completion_percentage
+            "total_est_hours": total_est_hours,
+            "completion_percentage": completion_percentage,
+            "career_readiness": career_readiness,
+            "workload_analysis": workload_analysis,
         }
     )
 

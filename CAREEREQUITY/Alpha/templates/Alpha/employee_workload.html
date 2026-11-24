@@ -51,6 +51,60 @@
 
     </div>
 
+    <!-- AI Workload Imbalance & Burnout Intelligence Card -->
+    {% if workload_analysis %}
+    <div style="background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; padding:22px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+            <div>
+                <h3 style="font-size:17px; font-weight:700; color:#1f2937; margin:0;">AI Workload & Burnout Risk Analysis</h3>
+                <small style="color:#6b7280; font-size:12px;">Machine Learning classification based on active hours, complexity weights, and overdue pressure</small>
+            </div>
+            <span style="background:{{ workload_analysis.status_color }}; color:white; font-size:12px; font-weight:700; padding:6px 14px; border-radius:20px;">
+                {{ workload_analysis.status }}
+            </span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:16px;">
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
+                <span style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Workload Intensity Index</span>
+                <div style="font-size:22px; font-weight:800; color:#1e293b; margin:4px 0;">{{ workload_analysis.workload_score }} / 100</div>
+                <div style="height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;">
+                    <div style="height:100%; width:{{ workload_analysis.workload_score }}%; background:{{ workload_analysis.status_color }};"></div>
+                </div>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
+                <span style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Committed Hours</span>
+                <div style="font-size:22px; font-weight:800; color:#1e293b; margin:4px 0;">{{ workload_analysis.estimated_hours }} hrs</div>
+                <small style="color:#64748b; font-size:11px;">Actual recorded: {{ workload_analysis.actual_hours }} hrs</small>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
+                <span style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">High Complexity Tasks</span>
+                <div style="font-size:22px; font-weight:800; color:#1e293b; margin:4px 0;">{{ workload_analysis.high_complexity_tasks }}</div>
+                <small style="color:#64748b; font-size:11px;">Weighted 3x standard effort</small>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px;">
+                <span style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Overdue Deadlines</span>
+                <div style="font-size:22px; font-weight:800; color:{% if workload_analysis.overdue_tasks > 0 %}#ef4444{% else %}#10b981{% endif %}; margin:4px 0;">
+                    {{ workload_analysis.overdue_tasks }}
+                </div>
+                <small style="color:#64748b; font-size:11px;">Requires schedule attention</small>
+            </div>
+        </div>
+
+        <div style="background:#f9fafb; border-left:4px solid {{ workload_analysis.status_color }}; padding:10px 14px; border-radius:4px; font-size:12px; color:#4b5563;">
+            <strong>AI Assessment:</strong> {{ workload_analysis.advice }}
+            <ul style="margin:6px 0 0 16px; padding:0;">
+                {% for factor in workload_analysis.contributing_factors %}
+                    <li>{{ factor }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="assigned-tasks-section">
 
         <div class="section-heading">

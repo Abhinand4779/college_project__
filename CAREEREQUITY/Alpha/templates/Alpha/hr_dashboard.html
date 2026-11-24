@@ -1,13 +1,11 @@
-
 {% extends 'Alpha/base_dashboard.html' %}
 
-{% block title %}HR Dashboard | CareerEquity AI{% endblock %}
-{% block page_heading %}HR Dashboard{% endblock %}
+{% block title %}HR Intelligence Dashboard | CareerEquity AI{% endblock %}
+{% block page_heading %}HR Workforce Intelligence Dashboard{% endblock %}
 
 {% block extra_css %}
 <style>
 /* PAGE-WISE DASHBOARD */
-
 .main-content {
     min-height: 0;
 }
@@ -80,30 +78,41 @@
     border-left: 3px solid #9388ff;
 }
 
-/* REMOVE WELCOME DECORATION */
 .welcome-icon {
     display: none !important;
 }
 
-/* TASK MANAGEMENT */
-.task-empty {
-    padding: 35px 20px;
-    text-align: center;
-    background: #fafaff;
-    border: 1px dashed #d9d9ec;
-    border-radius: 12px;
-    margin-top: 15px;
+.pill-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
 }
+.pill-success { background: #dcfce7; color: #15803d; }
+.pill-warning { background: #fef3c7; color: #b45309; }
+.pill-danger { background: #fee2e2; color: #b91c1c; }
+.pill-info { background: #e0f2fe; color: #0369a1; }
+.pill-purple { background: #ede9fe; color: #6d28d9; }
 
-.task-empty h3 {
-    margin-bottom: 10px;
-    color: #292b48;
-}
-
-.task-empty p {
+.data-table-modern {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 13px;
-    color: #8991aa;
-    line-height: 1.7;
+    margin-top: 12px;
+}
+.data-table-modern th, .data-table-modern td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #edf2f7;
+}
+.data-table-modern th {
+    background: #f8fafc;
+    color: #4b5563;
+    font-weight: 600;
+}
+.data-table-modern tbody tr:hover {
+    background: #f9fafb;
 }
 
 .disclaimer {
@@ -116,11 +125,29 @@
     line-height: 1.6;
 }
 
+.redistribution-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 14px;
+}
+.redistribution-card {
+    background: white;
+    border: 1px solid #fef3c7;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
 @media(max-width: 700px) {
     .dashboard-pagination {
         gap: 10px;
     }
-
     .page-buttons button {
         padding: 9px 11px;
     }
@@ -128,66 +155,53 @@
 </style>
 {% endblock %}
 
-
 {% block sidebar_links %}
-
 <a href="#overview" class="menu-link active" data-page="overview">
     ▦ Dashboard
 </a>
-
 <a href="#employees" class="menu-link" data-page="employees">
     ♙ Employees
 </a>
-
 <a href="#departments" class="menu-link" data-page="departments">
     ▤ Departments
 </a>
-
 <a href="#positions" class="menu-link" data-page="positions">
     ▣ Job Positions
 </a>
-
 <a href="#tasks" class="menu-link" data-page="tasks">
     ☷ Task Management
 </a>
-
 <a href="#workload" class="menu-link" data-page="workload">
-    ◷ Workload Analysis
+    ◷ Workload Imbalance
 </a>
-
 <a href="#salary" class="menu-link" data-page="salary">
-    ₹ Salary Analysis
+    ₹ Salary Equity
 </a>
-
 <a href="#insights" class="menu-link" data-page="insights">
-    ◈ AI Insights
+    ◈ AI Intelligence
 </a>
-
 <a href="{% url 'create_employee' %}">
-    <span>+</span>
-    Add Employee
+    <span>+</span> Add Employee
 </a>
-
+<a href="{% url 'hr_task_assignment' %}">
+    <span>+</span> Assign Task
+</a>
 {% endblock %}
-
 
 {% block content %}
 
 <!-- ===================================
      PAGE 1: OVERVIEW
 =================================== -->
-
-<section class="dashboard-page active" id="overview" data-title="HR Dashboard">
+<section class="dashboard-page active" id="overview" data-title="HR Intelligence Dashboard">
 
     <div class="welcome-section">
         <div>
-            <span class="eyebrow">ADMINISTRATION / HR</span>
-
+            <span class="eyebrow">ADMINISTRATION / HR WORKFORCE INTELLIGENCE</span>
             <h1>Good day, {{ profile.full_name }}!</h1>
-
             <p>
-                Monitor employee performance, workload distribution
-                and salary insights.
+                Live workforce analytics, AI-driven workload risk monitoring, 
+                salary equity auditing, and promotion readiness insights.
             </p>
         </div>
     </div>
@@ -195,56 +209,53 @@
     <div class="section-heading">
         <div>
             <h2>Organization Overview</h2>
-            <p>Quick summary of your organization</p>
+            <p>Real-time workforce health metrics</p>
         </div>
-
-        <span class="date-label">HR Workspace</span>
+        <span class="date-label">{{ profile.organization|default:"CareerEquity Enterprise" }}</span>
     </div>
 
     <div class="stats-grid">
-
         <div class="stat-card">
             <div class="stat-icon purple">♙</div>
-            <p>Total Employees</p>
-            <h2>248</h2>
-            <span class="stat-note">Sample display value</span>
+            <p>Total Workforce</p>
+            <h2>{{ total_employees|default:0 }}</h2>
+            <span class="stat-note">{{ active_employees|default:0 }} Active Employees</span>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon blue">▤</div>
             <p>Departments</p>
-            <h2>12</h2>
-            <span class="stat-note">Sample display value</span>
+            <h2>{{ departments_count|default:0 }}</h2>
+            <span class="stat-note">{{ positions.count|default:0 }} Structured Roles</span>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon orange">◷</div>
             <p>Workload Alerts</p>
-            <h2>08</h2>
-            <span class="stat-note">Sample display value</span>
+            <h2>{{ workload_alerts_count|default:0 }}</h2>
+            <span class="stat-note">Burnout / High Risk flagged</span>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon green">₹</div>
-            <p>Salary Reviews</p>
-            <h2>16</h2>
-            <span class="stat-note">Sample display value</span>
+            <p>Salary Equity Audits</p>
+            <h2>{{ salary_reviews_count|default:0 }}</h2>
+            <span class="stat-note">Disparity flags for review</span>
         </div>
-
     </div>
 
     <div class="panel">
         <div class="panel-heading">
             <div>
-                <h3>Welcome to CareerEquity AI</h3>
-                <p>Organization workforce management overview</p>
+                <h3>System Capabilities Overview</h3>
+                <p>Machine Learning decision support & workforce fairness</p>
             </div>
+            <span class="ai-tag">AI Powered</span>
         </div>
 
-        <p style="font-size:13px;color:#8991aa;line-height:1.8;">
-            Use the sidebar to manage employees, departments, job
-            positions, tasks, workload analysis and salary insights.
-            Each section now opens as a separate dashboard page.
+        <p style="font-size:13px;color:#64748b;line-height:1.8;">
+            CareerEquity AI continuously evaluates task complexity weights, committed delivery hours, and deadlines to alert HR of potential burnout risks. 
+            Simultaneously, the regression engine models compensation fairness across experience, skill sets, and job levels while preserving complete human decision authority.
         </p>
     </div>
 
@@ -254,91 +265,336 @@
 <!-- ===================================
      PAGE 2: EMPLOYEES
 =================================== -->
-
-<section class="dashboard-page" id="employees" data-title="Employee Management">
+<section class="dashboard-page" id="employees" data-title="Employee Records">
 
     <div class="section-heading">
         <div>
             <h2>Employee Management</h2>
-            <p>View and manage employee information</p>
+            <p>Active organizational employee directory</p>
         </div>
-
-        <span class="date-label">Employees</span>
-    </div>
-
-    <div class="stats-grid">
-
-        <div class="stat-card">
-            <div class="stat-icon purple">♙</div>
-            <p>Total Employees</p>
-            <h2>248</h2>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon green">✓</div>
-            <p>Active Employees</p>
-            <h2>235</h2>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon blue">＋</div>
-            <p>New Employees</p>
-            <h2>13</h2>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon orange">▤</div>
-            <p>Departments</p>
-            <h2>12</h2>
-        </div>
-
+        <span class="date-label">{{ employees.count }} Total</span>
     </div>
 
     <div class="panel section-panel">
-
         <div class="panel-heading">
             <div>
-                <h3>Employee Records</h3>
-                <p>Illustrative records - database connection pending</p>
+                <h3>Employee Directory</h3>
+                <p>Live database records</p>
             </div>
+            <a href="{% url 'create_employee' %}" style="font-size:13px; color:#4f46e5; text-decoration:none; font-weight:600;">+ Add New Employee</a>
         </div>
 
         <div class="table-wrapper">
-            <table>
+            <table class="data-table-modern">
                 <thead>
                     <tr>
                         <th>Employee ID</th>
-                        <th>Employee</th>
+                        <th>Name</th>
                         <th>Department</th>
-                        <th>Designation</th>
+                        <th>Position Tier</th>
+                        <th>Experience</th>
                         <th>Status</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    <tr>
-                        <td>EMP001</td>
-                        <td>Employee A</td>
-                        <td>Development</td>
-                        <td>Software Developer</td>
-                        <td><span class="pill success">Active</span></td>
-                    </tr>
+                    {% for emp in employees %}
+                        <tr>
+                            <td><strong>{{ emp.employee_id }}</strong></td>
+                            <td>{{ emp.user.get_full_name|default:emp.user.username }}</td>
+                            <td>{{ emp.department.name }}</td>
+                            <td>{{ emp.position.title }} ({{ emp.position.job_level }})</td>
+                            <td>{{ emp.experience_years }} yrs</td>
+                            <td>
+                                <span class="pill-status {% if emp.employment_status == 'Active' %}pill-success{% else %}pill-danger{% endif %}">
+                                    {{ emp.employment_status }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:20px; color:#9ca3af;">
+                                No employee records found. Click "+ Add Employee" to create one.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                    <tr>
-                        <td>EMP002</td>
-                        <td>Employee B</td>
-                        <td>Design</td>
-                        <td>UI Designer</td>
-                        <td><span class="pill success">Active</span></td>
-                    </tr>
+</section>
 
+
+<!-- ===================================
+     PAGE 3: DEPARTMENTS
+=================================== -->
+<section class="dashboard-page" id="departments" data-title="Departments">
+
+    <div class="section-heading">
+        <div>
+            <h2>Departments</h2>
+            <p>Organizational structures and team distribution</p>
+        </div>
+        <span class="date-label">{{ departments.count }} Units</span>
+    </div>
+
+    <div class="panel">
+        <div class="panel-heading">
+            <div>
+                <h3>Departmental Breakdown</h3>
+                <p>Active departments configured in CareerEquity</p>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-top:14px;">
+            {% for dept in departments %}
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px;">
+                    <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">Department</div>
+                    <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin:6px 0;">{{ dept.name }}</h3>
+                    <p style="font-size:12px; color:#64748b; margin-bottom:10px;">{{ dept.description|default:"Standard organizational unit." }}</p>
+                    <span style="font-size:12px; color:#4f46e5; font-weight:600;">
+                        {{ dept.positions.count }} Roles Configured
+                    </span>
+                </div>
+            {% empty %}
+                <p style="color:#9ca3af;">No departments found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ===================================
+     PAGE 4: JOB POSITIONS
+=================================== -->
+<section class="dashboard-page" id="positions" data-title="Job Positions & Bands">
+
+    <div class="section-heading">
+        <div>
+            <h2>Job Positions & Salary Bands</h2>
+            <p>Role requirements, experience baselines and compensation bounds</p>
+        </div>
+        <span class="date-label">{{ positions.count }} Positions</span>
+    </div>
+
+    <div class="panel">
+        <div class="panel-heading">
+            <div>
+                <h3>Position Architecture</h3>
+                <p>Official role definitions</p>
+            </div>
+        </div>
+
+        <table class="data-table-modern">
+            <thead>
+                <tr>
+                    <th>Job Title</th>
+                    <th>Department</th>
+                    <th>Level</th>
+                    <th>Req. Experience</th>
+                    <th>Salary Range (INR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pos in positions %}
                     <tr>
-                        <td>EMP003</td>
-                        <td>Employee C</td>
-                        <td>Testing</td>
-                        <td>QA Engineer</td>
-                        <td><span class="pill info">Active</span></td>
+                        <td><strong>{{ pos.title }}</strong></td>
+                        <td>{{ pos.department.name }}</td>
+                        <td><span class="pill-status pill-purple">{{ pos.job_level }}</span></td>
+                        <td>{{ pos.required_experience }} yrs</td>
+                        <td>
+                            {% if pos.minimum_salary and pos.maximum_salary %}
+                                ₹{{ pos.minimum_salary|floatformat:0 }} – ₹{{ pos.maximum_salary|floatformat:0 }}
+                            {% else %}
+                                Market Aligned
+                            {% endif %}
+                        </td>
                     </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:20px; color:#9ca3af;">No job positions configured.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+
+<!-- ===================================
+     PAGE 5: TASK MANAGEMENT
+=================================== -->
+<section class="dashboard-page" id="tasks" data-title="Task Management">
+
+    <div class="section-heading">
+        <div>
+            <h2>Task Management & Delivery Records</h2>
+            <p>Active task assignments, estimated complexity and deadlines</p>
+        </div>
+        <span class="date-label">{{ assignments.count }} Assignments</span>
+    </div>
+
+    <div class="panel">
+        <div class="panel-heading">
+            <div>
+                <h3>Assigned Deliverables</h3>
+                <p>Tracked for workload and capacity prediction</p>
+            </div>
+            <a href="{% url 'hr_task_assignment' %}" style="font-size:13px; color:#4f46e5; text-decoration:none; font-weight:600;">+ Assign New Task</a>
+        </div>
+
+        <table class="data-table-modern">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Assigned To</th>
+                    <th>Complexity</th>
+                    <th>Est. Hours</th>
+                    <th>Actual Hours</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assignments %}
+                    <tr>
+                        <td>
+                            <strong>{{ a.task.title }}</strong>
+                            <div style="font-size:11px; color:#9ca3af;">{{ a.task.description|truncatewords:6 }}</div>
+                        </td>
+                        <td>{{ a.employee.user.get_full_name|default:a.employee.user.username }}</td>
+                        <td>
+                            <span class="pill-status {% if a.task.complexity == 'High' %}pill-danger{% elif a.task.complexity == 'Medium' %}pill-warning{% else %}pill-info{% endif %}">
+                                {{ a.task.complexity }}
+                            </span>
+                        </td>
+                        <td>{{ a.task.estimated_hours }}h</td>
+                        <td>{{ a.actual_hours }}h</td>
+                        <td>{{ a.task.deadline|date:"d M Y"|default:"Open" }}</td>
+                        <td>
+                            <span class="pill-status {% if a.status == 'Completed' %}pill-success{% elif a.status == 'In Progress' %}pill-info{% else %}pill-warning{% endif %}">
+                                {{ a.status }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" style="text-align:center; padding:20px; color:#9ca3af;">No task assignments found. Click "+ Assign Task" above.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+
+<!-- ===================================
+     PAGE 6: WORKLOAD ANALYSIS
+=================================== -->
+<section class="dashboard-page" id="workload" data-title="Workload Imbalance & Burnout Analysis">
+
+    <div class="section-heading">
+        <div>
+            <h2>Workload Imbalance & Burnout Detection</h2>
+            <p>ML-powered task complexity and capacity distribution analysis</p>
+        </div>
+        <span class="date-label">Module 3A</span>
+    </div>
+
+    <div class="content-grid" style="display:grid; grid-template-columns: 1fr; gap:20px;">
+
+        <!-- Department Workload Chart -->
+        <div class="panel chart-panel">
+            <div class="panel-heading">
+                <div>
+                    <h3>Departmental Workload Pressure Index</h3>
+                    <p>Average workload score (0–100) per organizational department</p>
+                </div>
+                <span class="small-tag">Live Model</span>
+            </div>
+
+            <div class="chart-container" style="height:260px;">
+                <canvas id="workloadChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Task Redistribution Recommendations -->
+        {% if redistributions %}
+        <div class="redistribution-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:#92400e; font-size:14px;">⚡ AI Recommended Workload Rebalancing:</strong>
+                <span style="font-size:11px; background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:12px; font-weight:700;">Optimization Ready</span>
+            </div>
+            <p style="font-size:12px; color:#78350f; margin:6px 0 12px 0;">
+                The ML model detected uneven workload distributions. Propose reallocating high-effort tasks to available team members:
+            </p>
+            {% for r in redistributions %}
+                <div class="redistribution-card">
+                    <div>
+                        <strong>Reassign: "{{ r.task_title }}"</strong> ({{ r.task_hours }}h, {{ r.task_complexity }} complexity)
+                        <div style="font-size:12px; color:#6b7280; margin-top:3px;">
+                            From: <span style="color:#b91c1c; font-weight:600;">{{ r.from_employee }}</span> (Score: {{ r.from_score }}/100)
+                            ➔ To: <span style="color:#15803d; font-weight:600;">{{ r.to_employee }}</span> (Score: {{ r.to_score }}/100)
+                        </div>
+                    </div>
+                    <span class="pill-status pill-success">Reduces load by ~{{ r.projected_reduction }} pts</span>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Employee Workload Table -->
+        <div class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h3>Workforce Workload Status & Burnout Alerts</h3>
+                    <p>Continuous AI evaluation based on task volume, complexity weights, and overdue penalties</p>
+                </div>
+            </div>
+
+            <table class="data-table-modern">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Active Tasks</th>
+                        <th>Committed Hours</th>
+                        <th>Overdue Tasks</th>
+                        <th>Workload Score</th>
+                        <th>ML Risk Classification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in workload_analyses %}
+                        <tr>
+                            <td><strong>{{ w.analysis.employee_name }}</strong></td>
+                            <td>{{ w.employee.department.name }}</td>
+                            <td>{{ w.analysis.active_tasks }}</td>
+                            <td>{{ w.analysis.estimated_hours }}h</td>
+                            <td>
+                                {% if w.analysis.overdue_tasks > 0 %}
+                                    <span style="color:#ef4444; font-weight:700;">{{ w.analysis.overdue_tasks }} Overdue</span>
+                                {% else %}
+                                    <span style="color:#10b981;">0</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ w.analysis.workload_score }}</strong> / 100
+                            </td>
+                            <td>
+                                <span class="pill-status" style="background:{{ w.analysis.status_color }}; color:white;">
+                                    {{ w.analysis.status }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:20px; color:#9ca3af;">No workload records available.</td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -349,304 +605,73 @@
 
 
 <!-- ===================================
-     PAGE 3: DEPARTMENTS
-=================================== -->
-
-<section class="dashboard-page" id="departments" data-title="Department Management">
-
-    <div class="section-heading">
-        <div>
-            <h2>Department Management</h2>
-            <p>Manage organization departments</p>
-        </div>
-
-        <span class="date-label">Departments</span>
-    </div>
-
-    <div class="panel">
-
-        <div class="panel-heading">
-            <div>
-                <h3>Department Overview</h3>
-                <p>Illustrative department records</p>
-            </div>
-        </div>
-
-        <div class="department-grid">
-
-            <div class="department-card">
-                Development
-                <strong>52</strong>
-            </div>
-
-            <div class="department-card">
-                Human Resources
-                <strong>18</strong>
-            </div>
-
-            <div class="department-card">
-                Finance
-                <strong>24</strong>
-            </div>
-
-            <div class="department-card">
-                Marketing
-                <strong>30</strong>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ===================================
-     PAGE 4: JOB POSITIONS
-=================================== -->
-
-<section class="dashboard-page" id="positions" data-title="Job Positions">
-
-    <div class="section-heading">
-        <div>
-            <h2>Job Positions</h2>
-            <p>Manage job roles and requirements</p>
-        </div>
-
-        <span class="date-label">Job Management</span>
-    </div>
-
-    <div class="panel">
-
-        <div class="panel-heading">
-            <div>
-                <h3>Available Job Positions</h3>
-                <p>Illustrative position records</p>
-            </div>
-        </div>
-
-        <div class="position-item">
-            <span>Software Developer</span>
-            <span class="position-count">32 employees</span>
-        </div>
-
-        <div class="position-item">
-            <span>Data Analyst</span>
-            <span class="position-count">18 employees</span>
-        </div>
-
-        <div class="position-item">
-            <span>UI/UX Designer</span>
-            <span class="position-count">12 employees</span>
-        </div>
-
-        <div class="position-item">
-            <span>Project Manager</span>
-            <span class="position-count">09 employees</span>
-        </div>
-
-    </div>
-
-    <div class="panel">
-        <h3>Job Requirements</h3>
-        <p style="font-size:13px;color:#8991aa;margin-top:10px;line-height:1.7;">
-            Job requirements should include required skills,
-            qualifications, experience, responsibilities and salary bands.
-        </p>
-    </div>
-
-</section>
-
-
-<!-- ===================================
-     PAGE 5: TASK MANAGEMENT
-=================================== -->
-
-<section class="dashboard-page" id="tasks" data-title="Task Management">
-
-    <div class="section-heading">
-        <div>
-            <h2>Task Management</h2>
-            <p>Manage employee assignments and task information</p>
-        </div>
-
-        <span class="date-label">Tasks</span>
-    </div>
-
-    <div class="stats-grid">
-
-        <div class="stat-card">
-            <div class="stat-icon purple">▤</div>
-            <p>Total Tasks</p>
-            <h2>--</h2>
-            <span class="stat-note">Awaiting database connection</span>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon blue">◷</div>
-            <p>Assigned Tasks</p>
-            <h2>--</h2>
-            <span class="stat-note">Awaiting database connection</span>
-        </div>
-
-    </div>
-
-    <div class="panel">
-
-        <h3>Task Records</h3>
-
-        <div class="task-empty">
-            <h3>No task records connected yet</h3>
-
-            <p>
-                The task management interface is ready for development.
-                After creating the Task database model, you can add
-                employees, task descriptions, estimated hours,
-                actual hours and deadlines here.
-            </p>
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ===================================
-     PAGE 6: WORKLOAD ANALYSIS
-=================================== -->
-
-<section class="dashboard-page" id="workload" data-title="Workload Analysis">
-
-    <div class="section-heading">
-        <div>
-            <h2>Workload Analysis</h2>
-            <p>Monitor employee workload distribution</p>
-        </div>
-
-        <span class="date-label">Workload</span>
-    </div>
-
-    <div class="content-grid">
-
-        <div class="panel chart-panel">
-
-            <div class="panel-heading">
-                <div>
-                    <h3>Workload Distribution</h3>
-                    <p>Illustrative department workload overview</p>
-                </div>
-
-                <span class="small-tag">Overview</span>
-            </div>
-
-            <div class="chart-container">
-                <canvas id="workloadChart"></canvas>
-            </div>
-
-        </div>
-
-        <div class="panel">
-
-            <div class="panel-heading">
-                <div>
-                    <h3>Workload Alerts</h3>
-                    <p>Items requiring review</p>
-                </div>
-            </div>
-
-            <div class="insight-item">
-                <div class="insight-symbol orange">!</div>
-                <div>
-                    <h4>High workload</h4>
-                    <p>Review employee task allocations.</p>
-                </div>
-            </div>
-
-            <div class="insight-item">
-                <div class="insight-symbol purple">◷</div>
-                <div>
-                    <h4>Task distribution</h4>
-                    <p>Compare estimated and actual working hours.</p>
-                </div>
-            </div>
-
-            <div class="insight-item">
-                <div class="insight-symbol green">✓</div>
-                <div>
-                    <h4>Balanced workload</h4>
-                    <p>Monitor workload changes over time.</p>
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ===================================
      PAGE 7: SALARY ANALYSIS
 =================================== -->
-
-<section class="dashboard-page" id="salary" data-title="Salary Analysis">
+<section class="dashboard-page" id="salary" data-title="Salary Equity Audit">
 
     <div class="section-heading">
         <div>
-            <h2>Salary Analysis</h2>
-            <p>Review salary estimates and compensation fairness</p>
+            <h2>Salary Range Estimation & Equity Audit</h2>
+            <p>Peer compensation benchmarks and explainable fairness verification</p>
         </div>
-
-        <span class="date-label">Compensation</span>
-    </div>
-
-    <div class="stats-grid">
-
-        <div class="stat-card">
-            <div class="stat-icon purple">₹</div>
-            <p>Salary Reviews</p>
-            <h2>16</h2>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon blue">▤</div>
-            <p>Job Levels</p>
-            <h2>06</h2>
-        </div>
-
+        <span class="date-label">Module 3B & 3C</span>
     </div>
 
     <div class="panel">
-
         <div class="panel-heading">
             <div>
-                <h3>AI Salary Estimation</h3>
-                <p>Salary estimation module</p>
+                <h3>Compensation Equity Roster</h3>
+                <p>AI model predicted ranges vs. current compensation records</p>
             </div>
-
-            <span class="ai-tag">AI</span>
+            <span class="ai-tag">Explainable AI</span>
         </div>
 
-        <div class="salary-highlight">
-            <h2>AI Salary Insights</h2>
-
-            <p>
-                Review estimated salary ranges using role, experience,
-                skills and relevant compensation factors.
-            </p>
-        </div>
-
+        <table class="data-table-modern">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Role & Level</th>
+                    <th>Experience</th>
+                    <th>Recorded Salary</th>
+                    <th>Predicted Fair Range</th>
+                    <th>Equity Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in salary_audits %}
+                    <tr>
+                        <td><strong>{{ item.employee.user.get_full_name|default:item.employee.user.username }}</strong></td>
+                        <td>{{ item.employee.position.title }} ({{ item.employee.position.job_level }})</td>
+                        <td>{{ item.employee.experience_years }} yrs</td>
+                        <td>
+                            {% if item.profile.current_salary %}
+                                <strong>₹{{ item.profile.current_salary|floatformat:0 }}</strong>
+                            {% else %}
+                                <span style="color:#9ca3af;">Pending Entry</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:#4f46e5; font-weight:600;">
+                            ₹{{ item.profile.min_range|floatformat:0 }} – ₹{{ item.profile.max_range|floatformat:0 }}
+                        </td>
+                        <td>
+                            <span class="pill-status pill-{{ item.profile.equity_badge }}">
+                                {{ item.profile.equity_status }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:20px; color:#9ca3af;">No salary records found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <div class="panel">
-
-        <h3>Compensation Fairness</h3>
-
-        <p style="font-size:13px;color:#8991aa;margin-top:10px;line-height:1.7;">
-            Compare compensation among employees in comparable roles,
-            experience levels and job grades, subject to authorized access.
-        </p>
-
+    <div class="disclaimer">
+        <strong>HR Governance Safeguard:</strong>
+        CareerEquity AI salary models provide objective baseline estimates based on validated competencies, tenure, and responsibility levels. 
+        In accordance with responsible AI principles, the platform does not automate hiring, firing, or salary adjustments; all recommendations are subject to human review.
     </div>
 
 </section>
@@ -655,137 +680,107 @@
 <!-- ===================================
      PAGE 8: AI INSIGHTS
 =================================== -->
-
-<section class="dashboard-page" id="insights" data-title="AI Insights">
+<section class="dashboard-page" id="insights" data-title="AI Intelligence Workspace">
 
     <div class="section-heading">
         <div>
-            <h2>AI Recommendations</h2>
-            <p>AI-supported workforce recommendations</p>
+            <h2>Workforce AI Recommendations & Analytics</h2>
+            <p>Aggregated workforce insights powered by Machine Learning</p>
         </div>
-
-        <span class="date-label">AI Workspace</span>
+        <span class="date-label">Intelligence</span>
     </div>
 
     <div class="panel">
-
         <div class="panel-heading">
             <div>
-                <h3>AI Insights</h3>
-                <p>Recommendations for HR review</p>
+                <h3>Key Operational Highlights</h3>
+                <p>Synthesized across all 4 machine learning modules</p>
             </div>
-
-            <span class="ai-tag">AI</span>
+            <span class="ai-tag">AI Summary</span>
         </div>
 
         <div class="insight-item">
             <div class="insight-symbol orange">!</div>
-
             <div>
-                <h4>Workload Distribution</h4>
+                <h4>Workload Distribution Risk: {{ workload_alerts_count }} Alert(s) Active</h4>
                 <p>
-                    Identify possible workload imbalance using
-                    recorded task hours and complexity.
+                    {% if workload_alerts_count > 0 %}
+                        {{ workload_alerts_count }} employee(s) are exhibiting workload intensity scores > 70 or have overdue High-complexity assignments. Review the Workload Imbalance tab to review AI rebalancing recommendations.
+                    {% else %}
+                        All active employees currently have sustainable workload balances. No critical burnout indicators detected.
+                    {% endif %}
                 </p>
             </div>
         </div>
 
         <div class="insight-item">
             <div class="insight-symbol purple">₹</div>
-
             <div>
-                <h4>Salary Fairness Analysis</h4>
+                <h4>Salary Equity Audit: {{ salary_reviews_count }} Case(s) Requiring Attention</h4>
                 <p>
-                    Compare compensation across similar roles,
-                    experience and job levels.
+                    Compensation comparisons against same-level peer cohorts and ML regression bounds show 
+                    {{ salary_reviews_count }} individual(s) currently falling outside predicted market tolerance bands.
                 </p>
             </div>
         </div>
 
         <div class="insight-item">
             <div class="insight-symbol green">✓</div>
-
             <div>
-                <h4>Skill Development</h4>
+                <h4>Competency Mapping & Promotion Readiness</h4>
                 <p>
-                    Identify skill gaps and recommend suitable
-                    employee training.
+                    Employees can independently audit their skill gaps against targeted higher positions in the employee portal, 
+                    unlocking transparent promotion readiness scores and structured milestones.
                 </p>
             </div>
         </div>
 
         <div class="insight-item">
             <div class="insight-symbol blue">↗</div>
-
             <div>
-                <h4>Career Progression</h4>
+                <h4>Organization Optimization</h4>
                 <p>
-                    Match employee qualifications and skills
-                    against target job requirements.
+                    Active departments: {{ departments_count }}. Total configured positions: {{ positions.count }}. 
+                    All data points reflect live database records and real-time model inference.
                 </p>
             </div>
         </div>
-
     </div>
 
     <div class="disclaimer">
-        AI insights are estimates and decision-support information.
-        HR must independently review and approve employment decisions.
+        AI insights are decision-support estimates. Human HR administrators retain complete authority and discretion over all personnel and compensation decisions.
     </div>
 
 </section>
 
 <!-- PAGE NAVIGATION -->
-
 <div class="dashboard-pagination">
-
     <p id="pageCounter">Page 1 of 8</p>
-
     <div class="page-buttons">
-
-        <button type="button" id="previousPage" disabled>
-            ← Previous
-        </button>
-
-        <button type="button" class="primary" id="nextPage">
-            Next →
-        </button>
-
+        <button type="button" id="previousPage" disabled>← Previous</button>
+        <button type="button" class="primary" id="nextPage">Next →</button>
     </div>
-
 </div>
 
 {% endblock %}
 
-
 {% block extra_js %}
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    const pages = Array.from(
-        document.querySelectorAll(".dashboard-page")
-    );
-
-    const links = Array.from(
-        document.querySelectorAll(".menu-link[data-page]")
-    );
-
+    const pages = Array.from(document.querySelectorAll(".dashboard-page"));
+    const links = Array.from(document.querySelectorAll(".menu-link[data-page]"));
     const previousButton = document.getElementById("previousPage");
     const nextButton = document.getElementById("nextPage");
     const pageCounter = document.getElementById("pageCounter");
-
     const heading = document.querySelector(".topbar-left h3");
-
     const pageIds = pages.map(page => page.id);
 
     let currentIndex = 0;
 
     function showPage(index, updateAddress = true) {
-
-        if (index < 0 || index >= pages.length) {
-            return;
-        }
+        if (index < 0 || index >= pages.length) return;
 
         currentIndex = index;
 
@@ -795,165 +790,109 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         links.forEach(link => {
-            link.classList.toggle(
-                "active",
-                link.dataset.page === pages[index].id
-            );
+            link.classList.toggle("active", link.dataset.page === pages[index].id);
         });
 
-        pageCounter.textContent =
-            `Page ${index + 1} of ${pages.length}`;
-
-        if (heading) {
-            heading.textContent =
-                pages[index].dataset.title || "HR Dashboard";
+        if (pageCounter) {
+            pageCounter.textContent = `Page ${index + 1} of ${pages.length}`;
         }
 
-        previousButton.disabled = index === 0;
-        nextButton.disabled = index === pages.length - 1;
+        if (heading && pages[index].dataset.title) {
+            heading.textContent = pages[index].dataset.title;
+        }
+
+        if (previousButton) previousButton.disabled = index === 0;
+        if (nextButton) nextButton.disabled = index === pages.length - 1;
 
         if (updateAddress) {
             const newHash = "#" + pages[index].id;
-
             if (window.location.hash !== newHash) {
-                window.history.pushState(
-                    { page: pages[index].id },
-                    "",
-                    newHash
-                );
+                window.history.pushState({ page: pages[index].id }, "", newHash);
             }
         }
 
-        // Resize the chart after its page becomes visible.
-        if (window.workloadChartInstance &&
-            pages[index].id === "workload") {
-
+        if (window.workloadChartInstance && pages[index].id === "workload") {
             setTimeout(function () {
                 window.workloadChartInstance.resize();
-            }, 50);
+            }, 60);
         }
     }
 
-    // Sidebar navigation
     links.forEach(link => {
-
         link.addEventListener("click", function (event) {
-
             event.preventDefault();
-
             const index = pageIds.indexOf(this.dataset.page);
-
-            if (index !== -1) {
-                showPage(index);
-            }
-
+            if (index !== -1) showPage(index);
         });
-
     });
 
-    // Previous page
-    previousButton.addEventListener("click", function () {
-        showPage(currentIndex - 1);
-    });
+    if (previousButton) {
+        previousButton.addEventListener("click", function () {
+            showPage(currentIndex - 1);
+        });
+    }
 
-    // Next page
-    nextButton.addEventListener("click", function () {
-        showPage(currentIndex + 1);
-    });
+    if (nextButton) {
+        nextButton.addEventListener("click", function () {
+            showPage(currentIndex + 1);
+        });
+    }
 
-    // Browser back and forward buttons
     window.addEventListener("popstate", function () {
-
-        const requestedPage =
-            window.location.hash.replace("#", "");
-
+        const requestedPage = window.location.hash.replace("#", "");
         const index = pageIds.indexOf(requestedPage);
-
-        if (index !== -1) {
-            showPage(index, false);
-        } else {
-            showPage(0, false);
-        }
-
+        showPage(index !== -1 ? index : 0, false);
     });
 
-    // Load page from URL if a valid hash exists
-    const initialPage =
-        window.location.hash.replace("#", "");
-
+    const initialPage = window.location.hash.replace("#", "");
     const initialIndex = pageIds.indexOf(initialPage);
-
     showPage(initialIndex === -1 ? 0 : initialIndex, false);
 
-
-    // Workload Chart
+    // Live Dynamic Workload Chart
     const canvas = document.getElementById("workloadChart");
-
     if (canvas && window.Chart) {
+        const chartLabels = {{ chart_labels|safe }};
+        const chartData = {{ chart_data|safe }};
 
         window.workloadChartInstance = new Chart(canvas, {
-
             type: "bar",
-
             data: {
-                labels: [
-                    "Development",
-                    "Design",
-                    "Testing",
-                    "HR",
-                    "Finance"
-                ],
-
+                labels: chartLabels.length ? chartLabels : ["Engineering", "Data Science", "Design", "HR", "Finance"],
                 datasets: [{
-                    label: "Illustrative workload score",
-
-                    data: [78, 55, 62, 40, 48],
-
+                    label: "Avg Workload Score (0-100)",
+                    data: chartData.length ? chartData : [72, 60, 48, 38, 52],
                     backgroundColor: [
-                        "#6c63ff",
+                        "#6366f1",
                         "#38bdf8",
-                        "#20b486",
+                        "#10b981",
                         "#f59e0b",
-                        "#a78bfa"
+                        "#a855f7",
+                        "#ec4899"
                     ],
-
                     borderRadius: 8,
-                    maxBarThickness: 38
+                    maxBarThickness: 42
                 }]
             },
-
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-
                 plugins: {
-                    legend: {
-                        display: false
-                    }
+                    legend: { display: false }
                 },
-
                 scales: {
                     y: {
                         beginAtZero: true,
                         max: 100,
-                        grid: {
-                            color: "#eef0f5"
-                        }
+                        grid: { color: "#f1f5f9" }
                     },
-
                     x: {
-                        grid: {
-                            display: false
-                        }
+                        grid: { display: false }
                     }
                 }
             }
-
         });
-
     }
 
 });
 </script>
-
 {% endblock %}

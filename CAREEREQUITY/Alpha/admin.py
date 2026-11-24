@@ -8,7 +8,9 @@ from .models import (
     EmployeeSkill,
     Task,
     TaskAssignment,
-    SalaryRecord
+    SalaryRecord,
+    PositionRequirement,
+    AccountProfile
 )
 
 admin.site.register(Department)
@@ -19,3 +21,5 @@ admin.site.register(EmployeeSkill)
 admin.site.register(Task)
 admin.site.register(TaskAssignment)
 admin.site.register(SalaryRecord)
+admin.site.register(PositionRequirement)
+admin.site.register(AccountProfile)

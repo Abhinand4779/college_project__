@@ -65,29 +65,29 @@
         <div class="stat-card">
             <div class="stat-icon purple">✓</div>
             <p>Assigned Tasks</p>
-            <h2>12</h2>
-            <span class="stat-note">Sample task count</span>
+            <h2>{{ total_tasks|default:0 }}</h2>
+            <span class="stat-note">Active deliverables</span>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon blue">✧</div>
-            <p>Skills Added</p>
-            <h2>08</h2>
-            <span class="stat-note">Profile skills</span>
+            <p>Skills Verified</p>
+            <h2>{{ total_skills|default:0 }}</h2>
+            <span class="stat-note">Active competency profile</span>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon orange">◷</div>
-            <p>Workload Status</p>
-            <h2>Balanced</h2>
-            <span class="stat-note">Illustrative status</span>
+            <p>AI Workload Status</p>
+            <h2 style="font-size: 19px;">{{ workload_analysis.status|default:"Balanced" }}</h2>
+            <span class="stat-note">Intensity Score: {{ workload_analysis.workload_score|default:45 }}/100</span>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon green">▣</div>
-            <p>Learning Goals</p>
-            <h2>04</h2>
-            <span class="stat-note">Sample development goals</span>
+            <p>Promotion Readiness</p>
+            <h2>{{ career_readiness.readiness_score|default:50 }}%</h2>
+            <span class="stat-note">Target: {{ career_readiness.target_position.title|default:"Next Role" }}</span>
         </div>
     </div>
 </section>

@@ -17,3 +17,7 @@ db.sqlite3
 # IDE
 .vscode/
 .idea/
+
+# Archives & Backups
+_archive_previous_projects/
+*.zip

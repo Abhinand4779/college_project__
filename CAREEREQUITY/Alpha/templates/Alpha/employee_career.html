@@ -1,13 +1,541 @@
 {% extends "Alpha/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Career Development & Promotion Readiness | CareerEquity AI{% endblock %}
+{% block page_heading %}Career Development & Promotion Roadmap{% endblock %}
+{% block page_subtitle %}AI-powered skill gap analysis, promotion readiness evaluation, and milestone growth roadmap{% endblock %}
+
+{% block extra_css %}
+<style>
+.career-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 30px;
+}
+
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 6px;
+}
+
+.section-card p.subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+/* Target Role Selector */
+.target-role-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.role-info-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.role-pill {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 14px;
+}
+.role-pill small {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.role-pill strong {
+    font-size: 14px;
+    color: #1e293b;
+}
+
+.target-select-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.target-select-form select {
+    padding: 9px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    background: #ffffff;
+    color: #1e293b;
+}
+.target-select-form button {
+    padding: 9px 18px;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.target-select-form button:hover {
+    background: #4338ca;
+}
+
+/* Readiness Overview Grid */
+.readiness-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+}
+@media (max-width: 850px) {
+    .readiness-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gauge-box {
+    background: #fdfdfd;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.radial-meter {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(#4f46e5 {{ career_readiness.readiness_score }}%, #e2e8f0 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    position: relative;
+}
+.radial-meter-inner {
+    width: 110px;
+    height: 110px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.radial-meter-inner .percentage {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1e293b;
+}
+.radial-meter-inner small {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.metrics-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+}
+.metric-tile {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+}
+.metric-tile span {
+    font-size: 12px;
+    color: #64748b;
+    display: block;
+    margin-bottom: 6px;
+}
+.metric-tile strong {
+    font-size: 20px;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 6px;
+}
+.progress-bar-bg {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: #4f46e5;
+    border-radius: 3px;
+}
+
+/* Competency Cards */
+.competency-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+.competency-col {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 18px;
+}
+.competency-col h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.competency-item {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+.competency-item .name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.competency-item .name-row strong {
+    font-size: 13px;
+    color: #1f2937;
+}
+.competency-item .detail-row {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.badge-pill {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-success { background: #dcfce7; color: #15803d; }
+.badge-warning { background: #fef3c7; color: #b45309; }
+.badge-danger { background: #fee2e2; color: #b91c1c; }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+
+/* Roadmap Timeline */
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 10px;
+}
+.roadmap-card {
+    display: flex;
+    gap: 18px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.roadmap-step-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #4f46e5;
+    color: white;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+.roadmap-content {
+    flex: 1;
+}
+.roadmap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.roadmap-header h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+.roadmap-header .timeline-tag {
+    font-size: 12px;
+    color: #4f46e5;
+    font-weight: 600;
+    background: #eef2ff;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+.roadmap-content p {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+.action-items-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12px;
+    color: #374151;
+}
+.action-items-list li {
+    margin-bottom: 4px;
+}
+
+.disclaimer-box {
+    background: #f8fafc;
+    border-left: 4px solid #4f46e5;
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.6;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-content">
-    <h1>Career Development</h1>
-    <p>Explore your career development opportunities.</p>
+<div class="career-container">
 
-    <div class="dashboard-card">
-        <h3>Development Roadmap</h3>
-        <p>Your career development information will appear here.</p>
+    <!-- Target Role Selector Bar -->
+    <div class="target-role-bar">
+        <div class="role-info-group">
+            <div class="role-pill">
+                <small>Current Position</small>
+                <strong>{{ employee.position.title }} ({{ employee.position.job_level }})</strong>
+            </div>
+
+            <span style="font-size: 20px; color: #94a3b8;">➔</span>
+
+            <div class="role-pill">
+                <small>Target Aspirated Role</small>
+                <strong>
+                    {% if career_readiness.target_position %}
+                        {{ career_readiness.target_position.title }} ({{ career_readiness.target_position.job_level }})
+                    {% else %}
+                        Select a Target Position
+                    {% endif %}
+                </strong>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'employee_career' %}" class="target-select-form">
+            {% csrf_token %}
+            <select name="target_position" required>
+                <option value="">-- Choose Target Promotion Role --</option>
+                {% for pos in available_positions %}
+                    <option value="{{ pos.id }}" {% if career_readiness.target_position and pos.id == career_readiness.target_position.id %}selected{% endif %}>
+                        {{ pos.department.name }}: {{ pos.title }} ({{ pos.job_level }})
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Update Target Role</button>
+        </form>
     </div>
+
+    <!-- Readiness Evaluation Overview -->
+    <div class="section-card">
+        <h3>Promotion Readiness Index & Alignment</h3>
+        <p class="subtitle">
+            Holistic readiness assessment comparing technical competencies, tenure, and execution history against target position requirements.
+        </p>
+
+        <div class="readiness-grid">
+            <div class="gauge-box">
+                <div class="radial-meter">
+                    <div class="radial-meter-inner">
+                        <span class="percentage">{{ career_readiness.readiness_score }}%</span>
+                        <small>READINESS</small>
+                    </div>
+                </div>
+                <span class="badge-pill badge-{{ career_readiness.readiness_badge }}" style="font-size: 12px; padding: 6px 12px;">
+                    {{ career_readiness.readiness_label }}
+                </span>
+            </div>
+
+            <div class="metrics-summary-grid">
+                <div class="metric-tile">
+                    <span>Skill Match Score</span>
+                    <strong>{{ career_readiness.skill_match_percentage }}%</strong>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: {{ career_readiness.skill_match_percentage }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="metric-tile">
+                    <span>Experience Match</span>
+                    <strong>{{ career_readiness.current_experience }} / {{ career_readiness.required_experience }} yrs</strong>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: {{ career_readiness.exp_match_percentage }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="metric-tile">
+                    <span>Experience Gap</span>
+                    <strong style="color: {% if career_readiness.experience_gap == 0 %}#10b981{% else %}#f59e0b{% endif %};">
+                        {% if career_readiness.experience_gap == 0 %}
+                            Tenure Met ✓
+                        {% else %}
+                            {{ career_readiness.experience_gap }} yrs to threshold
+                        {% endif %}
+                    </strong>
+                    <small style="color: #64748b; font-size: 11px;">Based on role baseline</small>
+                </div>
+
+                <div class="metric-tile">
+                    <span>Delivery Reliability</span>
+                    <strong style="color: #10b981;">Strong Track Record</strong>
+                    <small style="color: #64748b; font-size: 11px;">Validated task execution</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Competency Breakdown: Matched, Developing, Missing -->
+    <div class="section-card">
+        <h3>Competency Gap Intelligence</h3>
+        <p class="subtitle">
+            Granular comparison between your verified skills and the specific expectations of the target position.
+        </p>
+
+        <div class="competency-columns">
+            <!-- Matched Skills -->
+            <div class="competency-col">
+                <h4 style="color: #15803d;">
+                    <span>✓ Matched Competencies</span>
+                    <span class="badge-pill badge-success">{{ career_readiness.matched_skills|length }}</span>
+                </h4>
+                {% if career_readiness.matched_skills %}
+                    {% for item in career_readiness.matched_skills %}
+                        <div class="competency-item">
+                            <div class="name-row">
+                                <strong>{{ item.name }}</strong>
+                                <span class="badge-pill badge-success">{{ item.current_prof }}</span>
+                            </div>
+                            <div class="detail-row">
+                                Required: {{ item.required_prof }} (Meets standard)
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size: 12px; color: #9ca3af;">No exact proficiency matches yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Developing Skills -->
+            <div class="competency-col">
+                <h4 style="color: #b45309;">
+                    <span>⚡ Proficiency Gaps</span>
+                    <span class="badge-pill badge-warning">{{ career_readiness.developing_skills|length }}</span>
+                </h4>
+                {% if career_readiness.developing_skills %}
+                    {% for item in career_readiness.developing_skills %}
+                        <div class="competency-item">
+                            <div class="name-row">
+                                <strong>{{ item.name }}</strong>
+                                <span class="badge-pill badge-warning">{{ item.current_prof }}</span>
+                            </div>
+                            <div class="detail-row">
+                                Target: <strong>{{ item.required_prof }}</strong> • {{ item.action }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size: 12px; color: #9ca3af;">No intermediate proficiency gaps.</p>
+                {% endif %}
+            </div>
+
+            <!-- Missing Skills -->
+            <div class="competency-col">
+                <h4 style="color: #b91c1c;">
+                    <span>! Missing Required Competencies</span>
+                    <span class="badge-pill badge-danger">{{ career_readiness.missing_skills|length }}</span>
+                </h4>
+                {% if career_readiness.missing_skills %}
+                    {% for item in career_readiness.missing_skills %}
+                        <div class="competency-item">
+                            <div class="name-row">
+                                <strong>{{ item.name }}</strong>
+                                <span class="badge-pill badge-danger">Missing</span>
+                            </div>
+                            <div class="detail-row">
+                                Target: <strong>{{ item.required_prof }}</strong> • Recommended for roadmap
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size: 12px; color: #10b981; font-weight: 500;">All required skills are present in profile!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Step-by-Step Personalized Development Roadmap -->
+    <div class="section-card">
+        <h3>Personalized Career Growth Roadmap</h3>
+        <p class="subtitle">
+            Step-by-step milestones generated to systematically bridge your competency and experience gaps.
+        </p>
+
+        <div class="timeline-container">
+            {% for m in career_readiness.roadmap %}
+                <div class="roadmap-card">
+                    <div class="roadmap-step-badge" style="background: {{ m.color }};">
+                        {{ m.step }}
+                    </div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-header">
+                            <h4>{{ m.title }}</h4>
+                            <span class="timeline-tag">{{ m.timeline }} • {{ m.tag }}</span>
+                        </div>
+                        <p>{{ m.description }}</p>
+                        <ul class="action-items-list">
+                            {% for item in m.action_items %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Governance Note -->
+    <div class="disclaimer-box">
+        <strong>Career Progression Advisory Note:</strong>
+        CareerEquity AI development roadmaps and readiness assessments provide structured guidance and transparent decision-support. 
+        Completing recommendations prepares candidates for higher responsibilities; final promotion and salary level-up decisions are reviewed and approved by human management.
+    </div>
+
 </div>
 {% endblock %}

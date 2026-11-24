@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-)%u239z6ae-*s5as!_k@q152j8tuvr3yn8)6a$2v0&tat-5wwo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -73,16 +73,28 @@ WSGI_APPLICATION = 'CAREEREQUITY.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'careerequity_db',
-        'USER': 'postgres',
-        'PASSWORD': 'Alpha15@',
-        'HOST': 'localhost',
-        'PORT': '5432',
+import os
+
+USE_POSTGRES = os.environ.get('USE_POSTGRES', 'False').lower() in ('true', '1')
+
+if USE_POSTGRES:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'careerequity_db'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'Alpha15@'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation

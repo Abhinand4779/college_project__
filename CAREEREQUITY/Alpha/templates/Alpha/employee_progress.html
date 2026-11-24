@@ -1,13 +1,304 @@
 {% extends "Alpha/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}My Professional Progress | CareerEquity AI{% endblock %}
+{% block page_heading %}Professional Progress & Delivery Velocity{% endblock %}
+{% block page_subtitle %}Track your task execution milestones, delivery velocity, and promotion roadmap status{% endblock %}
+
+{% block extra_css %}
+<style>
+.progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 30px;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.kpi-card .label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kpi-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 6px;
+}
+
+.kpi-card .subtext {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.progress-bar-bg {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+.progress-bar-fill {
+    height: 100%;
+    background: #6366f1;
+    border-radius: 4px;
+}
+
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 6px;
+}
+
+.section-card p.subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+/* Badge pills */
+.badge-pill {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+.badge-success { background: #dcfce7; color: #15803d; }
+.badge-warning { background: #fef3c7; color: #b45309; }
+.badge-danger { background: #fee2e2; color: #b91c1c; }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+.badge-purple { background: #f3e8ff; color: #7e22ce; }
+
+/* Table */
+.data-table-modern {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+}
+.data-table-modern th, .data-table-modern td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #edf2f7;
+}
+.data-table-modern th {
+    background: #f8fafc;
+    color: #4b5563;
+    font-weight: 600;
+}
+.data-table-modern tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* Milestone Checklist Cards */
+.milestones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+.milestone-item-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 18px;
+    position: relative;
+}
+.milestone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.milestone-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #6366f1;
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.milestone-item-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+.milestone-item-card p {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+.checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.checklist li {
+    font-size: 12px;
+    color: #374151;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-content">
-    <h1>My Progress</h1>
-    <p>Track your professional progress.</p>
+<div class="progress-container">
 
-    <div class="dashboard-card">
-        <h3>Progress Overview</h3>
-        <p>Your progress information will appear here.</p>
+    <!-- KPI Summary Row -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="label">Task Completion Velocity</div>
+            <div class="value">{{ completion_percentage }}%</div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: {{ completion_percentage }}%;"></div>
+            </div>
+            <div class="subtext" style="margin-top:6px;">{{ completed_tasks }} of {{ total_tasks }} deliverables closed</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="label">Execution Hours Logged</div>
+            <div class="value">{{ total_actual_hours|floatformat:1 }} hrs</div>
+            <div class="subtext">Committed estimate: {{ total_est_hours|floatformat:1 }} hrs</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="label">Workload Balance Index</div>
+            <div class="value" style="font-size: 20px;">
+                <span class="badge-pill" style="background: {{ workload_analysis.status_color }}; color: white;">
+                    {{ workload_analysis.status }}
+                </span>
+            </div>
+            <div class="subtext">Score: {{ workload_analysis.workload_score }}/100</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="label">Target Promotion Readiness</div>
+            <div class="value" style="color: #6366f1;">{{ career_readiness.readiness_score }}%</div>
+            <div class="subtext">Target: {{ career_readiness.target_position.title|default:"Next Role" }}</div>
+        </div>
     </div>
+
+    <!-- Active Career Milestones Progress Tracker -->
+    {% if career_readiness.has_target %}
+    <div class="section-card">
+        <h3>Promotion Milestones Progress</h3>
+        <p class="subtitle">
+            Progress status toward qualification for <strong>{{ career_readiness.target_position.title }} ({{ career_readiness.target_position.job_level }})</strong>.
+        </p>
+
+        <div class="milestones-grid">
+            {% for m in career_readiness.roadmap %}
+                <div class="milestone-item-card">
+                    <div class="milestone-header">
+                        <div class="milestone-badge" style="background: {{ m.color }};">{{ m.step }}</div>
+                        <span class="badge-pill badge-info">{{ m.timeline }}</span>
+                    </div>
+                    <h4>{{ m.title }}</h4>
+                    <p>{{ m.description }}</p>
+                    <ul class="checklist">
+                        {% for item in m.action_items %}
+                            <li>
+                                <span style="color:#10b981; font-weight:bold;">✓</span>
+                                <span>{{ item }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Detailed Deliverables Execution Log -->
+    <div class="section-card">
+        <h3>Deliverables & Project Execution History</h3>
+        <p class="subtitle">Detailed record of tasks, complexity weights, effort logged, and deadline compliance.</p>
+
+        <table class="data-table-modern">
+            <thead>
+                <tr>
+                    <th>Deliverable Title</th>
+                    <th>Complexity</th>
+                    <th>Estimated Effort</th>
+                    <th>Logged Effort</th>
+                    <th>Target Deadline</th>
+                    <th>Execution Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assignments %}
+                    <tr>
+                        <td>
+                            <strong>{{ a.task.title }}</strong>
+                            <div style="font-size:11px; color:#9ca3af;">{{ a.task.description|default:"Standard deliverable."|truncatewords:8 }}</div>
+                        </td>
+                        <td>
+                            <span class="badge-pill {% if a.task.complexity == 'High' %}badge-danger{% elif a.task.complexity == 'Medium' %}badge-warning{% else %}badge-info{% endif %}">
+                                {{ a.task.complexity }}
+                            </span>
+                        </td>
+                        <td>{{ a.task.estimated_hours }} hrs</td>
+                        <td><strong>{{ a.actual_hours }} hrs</strong></td>
+                        <td>
+                            {% if a.task.deadline %}
+                                {{ a.task.deadline|date:"d M Y" }}
+                            {% else %}
+                                Open Timeline
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge-pill {% if a.status == 'Completed' %}badge-success{% elif a.status == 'In Progress' %}badge-info{% else %}badge-warning{% endif %}">
+                                {{ a.status }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:24px; color:#9ca3af;">
+                            No assigned deliverables on record.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </div>
 {% endblock %}

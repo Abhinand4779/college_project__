@@ -353,10 +353,12 @@ h1 {
     padding: 12px;
     margin-bottom: 15px;
     border-radius: 8px;
-    background: #d9f8f0;
-    color: #08665d;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
     font-size: 13px;
     text-align: center;
+    font-weight: 500;
 }
 
 .divider::before,
@@ -491,29 +493,19 @@ h1 {
 
     </div>
 
-    {% if messages %}
-    {% for message in messages %}
-        <div class="message">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
-
-
     <h1>Welcome Back</h1>
 
     <p class="subtitle">
         Sign in to access your CareerEquity workspace.
     </p>
 
-
     {% if messages %}
-    {% for message in messages %}
-        <div class="message">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
+        {% for message in messages %}
+            <div class="message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <!-- ROLE SELECTION -->
 
@@ -551,16 +543,16 @@ h1 {
                value="HR Manager/Admin">
 
 
-        <!-- EMAIL / EMPLOYEE ID -->
+        <!-- EMAIL / USERNAME / EMPLOYEE ID -->
          <div class="input-group">
-            <label id="loginLabel">Email Address</label>
+            <label id="loginLabel">Username or Email</label>
             <div class="input-box">
-                <span class="input-icon" id="loginIcon">✉</span>
+                <span class="input-icon" id="loginIcon">👥</span>
                 <input
-                type="email"
+                type="text"
                 name="username"
                 id="loginInput"
-                placeholder="Enter your work email"
+                placeholder="Enter username (e.g. hr_admin) or email"
                 required
                  >
              </div>
@@ -697,32 +689,24 @@ function selectRole(button, role) {
     if (role === 'Employee') {
 
         // Employee Login
-
-        label.textContent = 'Employee ID';
-
+        label.textContent = 'Username or Employee ID';
         input.type = 'text';
-        input.placeholder = 'Enter your Employee ID';
-
-        icon.textContent = '🆔';
+        input.placeholder = 'Enter username (e.g. alex_dev) or Employee ID';
+        icon.textContent = '👤';
 
         // Hide registration option
-
         divider.style.display = 'none';
         registration.style.display = 'none';
 
     } else {
 
         // HR Manager/Admin Login
-
-        label.textContent = 'Email Address';
-
-        input.type = 'email';
-        input.placeholder = 'Enter your work email';
-
-        icon.textContent = '✉';
+        label.textContent = 'Username or Email';
+        input.type = 'text';
+        input.placeholder = 'Enter username (e.g. hr_admin) or email';
+        icon.textContent = '👥';
 
         // Show registration option
-
         divider.style.display = 'flex';
         registration.style.display = 'block';
 

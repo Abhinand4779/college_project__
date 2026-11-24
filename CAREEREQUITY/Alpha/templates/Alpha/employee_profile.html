@@ -1,17 +1,294 @@
 {% extends "Alpha/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}My Profile | CareerEquity AI{% endblock %}
+{% block page_heading %}Professional Profile{% endblock %}
+{% block page_subtitle %}Your official organizational identity, department credentials, and verified competencies{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 30px;
+}
+
+.profile-header-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.avatar-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #38bdf8);
+    color: white;
+    font-size: 32px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.profile-main-meta {
+    flex: 1;
+}
+
+.profile-main-meta h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.profile-main-meta p.role-subtitle {
+    font-size: 14px;
+    color: #6366f1;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.profile-tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.badge-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+.badge-success { background: #dcfce7; color: #15803d; }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+.badge-purple { background: #f3e8ff; color: #7e22ce; }
+
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f8fafc;
+    font-size: 13px;
+}
+.detail-row span.label {
+    color: #64748b;
+    font-weight: 500;
+}
+.detail-row strong.val {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* Skills Grid */
+.skills-grid-showcase {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.skill-card-pill {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+.skill-card-pill strong {
+    color: #1e293b;
+}
+.skill-card-pill span.prof {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+.prof-Expert { background: #ede9fe; color: #6d28d9; }
+.prof-Advanced { background: #dcfce7; color: #15803d; }
+.prof-Intermediate { background: #e0f2fe; color: #0369a1; }
+.prof-Beginner { background: #fef3c7; color: #b45309; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-content">
-    <h1>My Profile</h1>
-    <p>View your employee information.</p>
+<div class="profile-container">
 
-    <div class="dashboard-card">
-        <h3>Personal Information</h3>
-        <p>Name: {{ request.user.account_profile.full_name }}</p>
-        <p>Employee ID: {{ request.user.account_profile.employee_id }}</p>
-        <p>Email: {{ request.user.email }}</p>
-        <p>Department: {{ request.user.account_profile.department }}</p>
-        <p>Designation: {{ request.user.account_profile.designation }}</p>
+    <!-- Profile Header Card -->
+    <div class="profile-header-card">
+        <div class="avatar-large">
+            {{ profile.full_name|first|upper }}
+        </div>
+
+        <div class="profile-main-meta">
+            <h2>{{ profile.full_name }}</h2>
+            <p class="role-subtitle">{{ employee.position.title }} • {{ employee.department.name }}</p>
+
+            <div class="profile-tags">
+                <span class="badge-pill badge-success">● {{ employee.employment_status }}</span>
+                <span class="badge-pill badge-purple">Tier: {{ employee.position.job_level }}</span>
+                <span class="badge-pill badge-info">ID: {{ employee.employee_id }}</span>
+            </div>
+        </div>
     </div>
+
+    <div class="section-grid">
+        <!-- Employment Information -->
+        <div class="section-card">
+            <h3>Organizational Details</h3>
+
+            <div class="detail-row">
+                <span class="label">Employee ID</span>
+                <strong class="val">{{ employee.employee_id }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Organization</span>
+                <strong class="val">{{ profile.organization|default:"CareerEquity Enterprise" }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Department</span>
+                <strong class="val">{{ employee.department.name }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Designation / Role</span>
+                <strong class="val">{{ employee.position.title }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Corporate Email</span>
+                <strong class="val">{{ employee.user.email }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Joining Date</span>
+                <strong class="val">
+                    {% if employee.joining_date %}
+                        {{ employee.joining_date|date:"d M Y" }}
+                    {% else %}
+                        Active
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Verified Tenure</span>
+                <strong class="val">{{ employee.experience_years }} Years</strong>
+            </div>
+        </div>
+
+        <!-- Career Target & Promotion Alignment -->
+        <div class="section-card">
+            <h3>Career Target & Alignment</h3>
+
+            <div class="detail-row">
+                <span class="label">Current Position Tier</span>
+                <strong class="val">{{ employee.position.job_level }}</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Aspirated Target Role</span>
+                <strong class="val" style="color: #6366f1;">
+                    {% if employee.target_position %}
+                        {{ employee.target_position.title }} ({{ employee.target_position.job_level }})
+                    {% else %}
+                        Next Level in Department
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Target Department</span>
+                <strong class="val">
+                    {% if employee.target_position %}
+                        {{ employee.target_position.department.name }}
+                    {% else %}
+                        {{ employee.department.name }}
+                    {% endif %}
+                </strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Promotion Readiness Score</span>
+                <strong class="val" style="color: #10b981;">
+                    {{ career_readiness.readiness_score }}%
+                </strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Status</span>
+                <span class="badge-pill badge-{{ career_readiness.readiness_badge }}">
+                    {{ career_readiness.readiness_label }}
+                </span>
+            </div>
+
+            <div style="margin-top: 16px;">
+                <a href="{% url 'employee_career' %}" style="display:inline-block; font-size:12px; color:#6366f1; text-decoration:none; font-weight:600;">
+                    ➔ Open Career Growth & Milestone Roadmap
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verified Skills Showcase -->
+    <div class="section-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; border:none; padding:0;">Verified Competencies & Proficiencies</h3>
+            <a href="{% url 'employee_skills' %}" style="font-size:13px; color:#6366f1; text-decoration:none; font-weight:600;">
+                + Manage Skills
+            </a>
+        </div>
+
+        <div class="skills-grid-showcase">
+            {% for es in skills %}
+                <div class="skill-card-pill">
+                    <strong>{{ es.skill.name }}</strong>
+                    <span class="prof prof-{{ es.proficiency }}">{{ es.proficiency }}</span>
+                </div>
+            {% empty %}
+                <p style="font-size:13px; color:#9ca3af; padding:10px 0;">No verified competencies logged yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
 </div>
 {% endblock %}

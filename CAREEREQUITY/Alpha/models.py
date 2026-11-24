@@ -72,6 +72,13 @@ class EmployeeProfile(models.Model):
         ],
         default="Active"
     )
+    target_position = models.ForeignKey(
+        JobPosition,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="aspiring_employees"
+    )
 
     def __str__(self):
         return f"{self.employee_id} - {self.user.username}"
@@ -110,6 +117,34 @@ class EmployeeSkill(models.Model):
 
     def __str__(self):
         return f"{self.employee} - {self.skill}"
+
+
+class PositionRequirement(models.Model):
+    position = models.ForeignKey(
+        JobPosition,
+        on_delete=models.CASCADE,
+        related_name="requirements"
+    )
+    skill = models.ForeignKey(
+        Skill,
+        on_delete=models.CASCADE
+    )
+    required_proficiency = models.CharField(
+        max_length=20,
+        choices=[
+            ("Beginner", "Beginner"),
+            ("Intermediate", "Intermediate"),
+            ("Advanced", "Advanced"),
+            ("Expert", "Expert"),
+        ],
+        default="Intermediate"
+    )
+
+    class Meta:
+        unique_together = ("position", "skill")
+
+    def __str__(self):
+        return f"{self.position.title} ({self.position.job_level}) requires {self.skill.name} ({self.required_proficiency})"
 
 
 class Task(models.Model):

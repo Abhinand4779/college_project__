@@ -1,13 +1,377 @@
 {% extends "Alpha/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Salary Insights & Equity | CareerEquity AI{% endblock %}
+{% block page_heading %}Salary Insights & Equity Analysis{% endblock %}
+{% block page_subtitle %}AI-powered compensation benchmarks and explainable fairness analysis{% endblock %}
+
+{% block extra_css %}
+<style>
+.salary-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 30px;
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.kpi-card .label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kpi-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.kpi-card .subtext {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.badge-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-success { background: #dcfce7; color: #15803d; }
+.badge-warning { background: #fef3c7; color: #b45309; }
+.badge-danger { background: #fee2e2; color: #b91c1c; }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+.badge-secondary { background: #f3f4f6; color: #4b5563; }
+
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 6px;
+}
+
+.section-card p.subtitle {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+/* Prediction Band Display */
+.range-bar-container {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+}
+.range-markers {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 8px;
+}
+.range-bar {
+    position: relative;
+    height: 14px;
+    background: #e2e8f0;
+    border-radius: 7px;
+    overflow: hidden;
+}
+.range-fill {
+    position: absolute;
+    left: 20%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #38bdf8);
+    border-radius: 7px;
+}
+
+/* Explainability Factors */
+.factor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.factor-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.factor-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+.factor-meta strong {
+    color: #374151;
+}
+.factor-meta span {
+    color: #4f46e5;
+    font-weight: 600;
+}
+.factor-progress-bg {
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.factor-progress-fill {
+    height: 100%;
+    background: #4f46e5;
+    border-radius: 4px;
+}
+
+/* Peer Comparison Table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.data-table th, .data-table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+}
+.data-table th {
+    background: #f9fafb;
+    color: #4b5563;
+    font-weight: 600;
+}
+.disclaimer-box {
+    background: #f8fafc;
+    border-left: 4px solid #6366f1;
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.6;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="page-content">
-    <h1>Salary Insights</h1>
-    <p>Review your salary information.</p>
+<div class="salary-container">
 
-    <div class="dashboard-card">
-        <h3>Salary Overview</h3>
-        <p>Your authorized salary information will appear here.</p>
+    <!-- Top KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="label">Current Recorded Salary</div>
+            <div class="value">
+                {% if latest_salary %}
+                    ₹{{ latest_salary.salary_amount|floatformat:0 }}
+                {% else %}
+                    ₹{{ salary_profile.predicted_median|floatformat:0 }}
+                {% endif %}
+            </div>
+            <div class="subtext">
+                {% if latest_salary %}
+                    Effective: {{ latest_salary.effective_date|date:"d M Y" }}
+                {% else %}
+                    Estimated baseline compensation
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="label">AI Predicted Fair Range</div>
+            <div class="value" style="font-size: 20px; color: #4f46e5;">
+                ₹{{ salary_profile.min_range|floatformat:0 }} – ₹{{ salary_profile.max_range|floatformat:0 }}
+            </div>
+            <div class="subtext">Median Fair Value: ₹{{ salary_profile.predicted_median|floatformat:0 }}</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="label">Salary Equity Status</div>
+            <div class="value" style="font-size: 18px;">
+                <span class="badge-pill badge-{{ salary_profile.equity_badge }}">
+                    {{ salary_profile.equity_status }}
+                </span>
+            </div>
+            <div class="subtext">{{ salary_profile.diff_text }}</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="label">Peer Level Alignment</div>
+            <div class="value">
+                {{ salary_profile.peer_comparison.ratio_percentage }}%
+            </div>
+            <div class="subtext">
+                of {{ position.job_level }} cohort median (₹{{ salary_profile.peer_comparison.median|floatformat:0 }})
+            </div>
+        </div>
     </div>
+
+    <!-- Machine Learning Fair Range Prediction Analysis -->
+    <div class="section-card">
+        <h3>AI Salary Range & Distribution Model</h3>
+        <p class="subtitle">
+            Trained on role requirements, experience level ({{ employee.experience_years }} yrs), 
+            verified skill competencies, and deliverable execution volume.
+        </p>
+
+        <div class="range-bar-container">
+            <div class="range-markers">
+                <span>Lower Bound: ₹{{ salary_profile.min_range|floatformat:0 }}</span>
+                <span style="color:#4f46e5;">Predicted Median: ₹{{ salary_profile.predicted_median|floatformat:0 }}</span>
+                <span>Upper Bound: ₹{{ salary_profile.max_range|floatformat:0 }}</span>
+            </div>
+            <div class="range-bar">
+                <div class="range-fill"></div>
+            </div>
+            <p style="margin-top: 12px; font-size: 12px; color: #6b7280; text-align: center;">
+                Per project design, CareerEquity AI presents a validated compensation band rather than claiming an exact single number, ensuring human oversight and market flexibility.
+            </p>
+        </div>
+    </div>
+
+    <!-- Explainable AI (XAI) Attribution Breakdown -->
+    <div class="section-card">
+        <h3>Explainable AI: Key Influencing Factors</h3>
+        <p class="subtitle">
+            Feature importance attribution breakdown highlighting the factors contributing to your salary range calculation.
+        </p>
+
+        <div class="factor-list">
+            {% for f in salary_profile.factors %}
+                <div class="factor-row">
+                    <div class="factor-meta">
+                        <div>
+                            <strong>{{ f.feature }}</strong> 
+                            <span style="font-weight: normal; color: #6b7280; font-size: 12px; margin-left: 6px;">
+                                ({{ f.detail }})
+                            </span>
+                        </div>
+                        <span>+₹{{ f.amount|floatformat:0 }} (~{{ f.percentage }}%)</span>
+                    </div>
+                    <div class="factor-progress-bg">
+                        <div class="factor-progress-fill" style="width: {{ f.percentage }}%;"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Same-Level Peer Equity Cohort -->
+    <div class="section-card">
+        <h3>Same-Level Peer Equity Comparison</h3>
+        <p class="subtitle">
+            Anonymized compensation comparison across employees at the same job position ({{ position.title }}) and tier.
+        </p>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Cohort Benchmark</th>
+                    <th>Your Metric</th>
+                    <th>Comparison Insight</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Cohort Title & Level</strong></td>
+                    <td>{{ salary_profile.peer_comparison.cohort_title }} ({{ salary_profile.peer_comparison.cohort_level }})</td>
+                    <td>{{ position.title }} ({{ position.job_level }})</td>
+                    <td><span class="badge-pill badge-info">Level Matched</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Cohort Median Salary</strong></td>
+                    <td>₹{{ salary_profile.peer_comparison.median|floatformat:0 }}</td>
+                    <td>₹{{ salary_profile.current_salary|default:salary_profile.predicted_median|floatformat:0 }}</td>
+                    <td>
+                        Ratio: <strong>{{ salary_profile.peer_comparison.ratio }}x</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Cohort Interquartile Range (P25 – P75)</strong></td>
+                    <td>₹{{ salary_profile.peer_comparison.p25|floatformat:0 }} – ₹{{ salary_profile.peer_comparison.p75|floatformat:0 }}</td>
+                    <td>₹{{ salary_profile.current_salary|default:salary_profile.predicted_median|floatformat:0 }}</td>
+                    <td>
+                        <span class="badge-pill badge-{{ salary_profile.equity_badge }}">
+                            {{ salary_profile.equity_status }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Cohort Size (Same Role)</strong></td>
+                    <td>{{ salary_profile.peer_comparison.cohort_count }} active employee(s)</td>
+                    <td>Active Contributor</td>
+                    <td>Representative Cohort</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Historical Salary Record Table -->
+    <div class="section-card">
+        <h3>Compensation History</h3>
+        <p class="subtitle">Chronological record of verified compensation adjustments.</p>
+
+        {% if salary_records %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Effective Date</th>
+                        <th>Salary Amount (INR)</th>
+                        <th>Position Tier</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in salary_records %}
+                        <tr>
+                            <td>{{ record.effective_date|date:"d M Y" }}</td>
+                            <td><strong>₹{{ record.salary_amount|floatformat:2 }}</strong></td>
+                            <td>{{ position.job_level }}</td>
+                            <td><span class="badge-pill badge-success">Recorded</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="padding: 24px; text-align: center; color: #9ca3af; font-size: 13px;">
+                No historical salary adjustment records currently on file.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Governance & Compliance Note -->
+    <div class="disclaimer-box">
+        <strong>Important Project Scope & Governance Note:</strong>
+        CareerEquity AI predictions are advisory analytics designed to support transparent review. 
+        Models are audited for fairness and do not utilize protected personal characteristics. 
+        All compensation adjustments require formal review and human approval by authorized HR leadership.
+    </div>
+
 </div>
 {% endblock %}
