@@ -1,0 +1,157 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Department Manager Dashboard | CareerEquity AI{% endblock %}
+{% block page_heading %}Department Manager Workspace{% endblock %}
+{% block page_subtitle %}Manage department employees, teams, performance, and departmental reports{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <!-- WELCOME HERO BANNER -->
+    <div class="hero-card" style="background: linear-gradient(120deg, #31135e 0%, #581c87 50%, #7e22ce 100%);">
+        <div>
+            <span class="eyebrow" style="color: #e9d5ff; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px;">
+                DEPARTMENT MANAGER • LEVEL 2
+            </span>
+            <h1 style="font-size: 26px; font-weight: 800; margin: 10px 0 6px 0; color: white;">Head of Department: {{ profile.full_name }}</h1>
+            <p style="color: #f3e8ff; font-size: 13px; line-height: 1.6; max-width: 650px;">
+                Department: <strong>{{ department.name }}</strong> •
+                Total Workforce: <strong>{{ total_employees }} Employees</strong> •
+                Teams: <strong>{{ teams_count }} Teams</strong>
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'department_teams' %}" style="background: rgba(255,255,255,0.15); color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700;">
+                🏢 View Teams ({{ teams_count }})
+            </a>
+            <a href="{% url 'department_reports' %}" style="background: #10b981; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700;">
+                📈 Analytics & Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 DEPARTMENT LEVEL KPIS -->
+    <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+        <div class="info-card">
+            <div class="card-icon" style="background: #f3e8ff; color: #7e22ce;">🏢</div>
+            <div style="font-size: 26px; font-weight: 800; color: #3b0764;">{{ total_employees }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Department Staff</div>
+            <small style="color: #64748b; font-size: 11px;">Across {{ teams_count }} teams</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #dcfce7; color: #15803d;">💰</div>
+            <div style="font-size: 24px; font-weight: 800; color: #14532d;">₹{{ total_salary_spend|floatformat:0 }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Annual Payroll Spend</div>
+            <small style="color: #64748b; font-size: 11px;">Budget: ₹{{ department.budget|floatformat:0 }}</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #fee2e2; color: #b91c1c;">⚠️</div>
+            <div style="font-size: 26px; font-weight: 800; color: #991b1b;">{{ burnout_count }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Burnout Alerts</div>
+            <small style="color: #64748b; font-size: 11px;">Overloaded staff flagged by AI</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #e0f2fe; color: #0369a1;">⏰</div>
+            <div style="font-size: 26px; font-weight: 800; color: #0c4a6e;">{{ attendance_rate }}%</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Dept Attendance</div>
+            <small style="color: #64748b; font-size: 11px;">{{ present_count }} present today</small>
+        </div>
+    </div>
+
+    <!-- TEAMS UNDER THIS DEPARTMENT -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">Teams under {{ department.name }}</h2>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">Supervised by dedicated Team Managers</p>
+            </div>
+            <a href="{% url 'department_teams' %}" style="color: #6258df; text-decoration: none; font-size: 12px; font-weight: 700;">View Full Team Details →</a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+            {% for t in teams %}
+                <div style="padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <div>
+                            <strong style="color: #1e293b; font-size: 15px;">{{ t.name }}</strong>
+                            <small style="display: block; color: #64748b; font-size: 12px; margin-top: 2px;">
+                                Team Lead: <strong>{{ t.team_manager.get_full_name|default:t.team_manager.username }}</strong>
+                            </small>
+                        </div>
+                        <span style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">
+                            Active
+                        </span>
+                    </div>
+                    <p style="font-size: 12px; color: #475569; margin: 0 0 12px 0;">
+                        {{ t.description|default:"Engineering deliverables & platform architecture." }}
+                    </p>
+                    <div style="font-size: 11px; color: #64748b; display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                        <span>Department: {{ department.name }}</span>
+                        <a href="{% url 'department_teams' %}" style="color: #6258df; text-decoration: none; font-weight: 700;">Roster →</a>
+                    </div>
+                </div>
+            {% empty %}
+                <p style="color: #94a3b8; font-size: 13px;">No teams created under this department yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- DEPARTMENT WORKLOAD & CAPACITY HEALTH -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">Department Workload & Burnout Heatmap</h2>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 12px;">Employee</th>
+                        <th style="padding: 12px;">Team</th>
+                        <th style="padding: 12px;">Role Level</th>
+                        <th style="padding: 12px;">Assigned Hours</th>
+                        <th style="padding: 12px;">AI Workload Score</th>
+                        <th style="padding: 12px;">Capacity Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in dept_workload %}
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px;">
+                                <strong style="color: #1e293b;">{{ item.employee.user.get_full_name|default:item.employee.user.username }}</strong>
+                                <small style="display: block; color: #64748b; font-size: 11px;">{{ item.employee.employee_id }}</small>
+                            </td>
+                            <td style="padding: 12px; color: #475569;">{{ item.employee.team.name|default:"General" }}</td>
+                            <td style="padding: 12px; color: #475569;">{{ item.employee.position.title }}</td>
+                            <td style="padding: 12px; font-weight: 700; color: #1e293b;">{{ item.analysis.estimated_hours }}h</td>
+                            <td style="padding: 12px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 80px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                        <div style="width: {{ item.analysis.workload_score }}%; height: 100%;
+                                            {% if item.analysis.workload_score > 85 %}background: #ef4444;
+                                            {% elif item.analysis.workload_score >= 40 %}background: #10b981;
+                                            {% else %}background: #3b82f6;{% endif %}">
+                                        </div>
+                                    </div>
+                                    <span style="font-weight: 700; font-size: 12px;">{{ item.analysis.workload_score }}%</span>
+                                </div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+                                    {% if item.analysis.workload_level == 'Overloaded' %}background: #fee2e2; color: #b91c1c;
+                                    {% elif item.analysis.workload_level == 'Balanced' %}background: #dcfce7; color: #15803d;
+                                    {% else %}background: #e0f2fe; color: #0369a1;{% endif %}">
+                                    {{ item.analysis.workload_level }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

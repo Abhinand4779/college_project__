@@ -1,0 +1,97 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Submit Performance Feedback | CareerEquity AI{% endblock %}
+{% block page_heading %}Performance Feedback{% endblock %}
+{% block page_subtitle %}Evaluate team deliverables, provide constructive coaching, and submit rating scores{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px;">
+
+        <!-- FEEDBACK SUBMISSION FORM -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                <div style="width: 40px; height: 40px; border-radius: 10px; background: #fef3c7; color: #b45309; display: grid; place-items: center; font-size: 20px;">⭐</div>
+                <div>
+                    <h2 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0;">Submit Review</h2>
+                    <small style="color: #64748b;">Feeds into promotion readiness algorithm</small>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'team_manager_feedback' %}">
+                {% csrf_token %}
+
+                <!-- SELECT EMPLOYEE -->
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Select Team Member *</label>
+                    <select name="employee_id" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit;">
+                        {% for m in team_members %}
+                            <option value="{{ m.id }}">{{ m.user.get_full_name|default:m.user.username }} ({{ m.employee_id }} - {{ m.position.title }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- RATING & REVIEW PERIOD -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Rating Score (1-5★) *</label>
+                        <select name="rating" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit;">
+                            <option value="5.0">5.0 ★ Exceptional</option>
+                            <option value="4.8">4.8 ★ Exceeds Expectations</option>
+                            <option value="4.5" selected>4.5 ★ High Performer</option>
+                            <option value="4.0">4.0 ★ Meets Expectations</option>
+                            <option value="3.5">3.5 ★ Needs Improvement</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Evaluation Period *</label>
+                        <input type="text" name="review_period" value="Q4 2026" required style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit;">
+                    </div>
+                </div>
+
+                <!-- QUALITATIVE FEEDBACK -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Qualitative Coaching & Feedback Notes *</label>
+                    <textarea name="feedback" rows="5" required placeholder="Highlight strengths, architecture contributions, areas for skill development, and promotion readiness..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+
+                <button type="submit" style="width: 100%; background: #6258df; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                    ⭐ Publish Performance Review
+                </button>
+            </form>
+        </div>
+
+        <!-- RECENT SUBMITTED EVALUATIONS -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+            <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">Published Team Evaluations</h2>
+
+            {% if recent_reviews %}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for r in recent_reviews %}
+                        <div style="padding: 14px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                <div>
+                                    <strong style="color: #1e293b; font-size: 13px;">{{ r.employee.user.get_full_name|default:r.employee.user.username }}</strong>
+                                    <small style="color: #64748b; font-size: 11px; display: block;">{{ r.review_period }}</small>
+                                </div>
+                                <span style="font-size: 12px; font-weight: 800; color: #b45309; background: #fef3c7; padding: 2px 8px; border-radius: 5px;">
+                                    {{ r.rating }} ★
+                                </span>
+                            </div>
+                            <p style="font-size: 12px; color: #475569; margin: 0 0 6px 0; line-height: 1.5;">
+                                "{{ r.feedback }}"
+                            </p>
+                            <small style="color: #94a3b8; font-size: 10px;">{{ r.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #94a3b8; font-size: 13px;">No reviews submitted yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

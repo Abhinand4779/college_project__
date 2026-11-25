@@ -1,0 +1,117 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Task Updates & Hour Logging | CareerEquity AI{% endblock %}
+{% block page_heading %}Task Updates{% endblock %}
+{% block page_subtitle %}Update deliverable status, submit completed work, and log execution hours{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <!-- UPDATE FORM CARD -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: #dcfce7; color: #15803d; display: grid; place-items: center; font-size: 18px;">📝</div>
+                <div>
+                    <h2 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0;">Submit Task Update</h2>
+                    <small style="color: #64748b;">Notify your Team Manager of deliverable progress</small>
+                </div>
+            </div>
+
+            {% if active_assignments %}
+                <form method="POST" id="updateTaskForm" action="{% url 'api_update_task' active_assignments.first.id %}">
+                    {% csrf_token %}
+
+                    <!-- TASK SELECTOR -->
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Select Assigned Task *</label>
+                        <select id="taskSelector" onchange="changeTaskAction(this.value)" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit;">
+                            {% for a in active_assignments %}
+                                <option value="{{ a.id }}" {% if forloop.first %}selected{% endif %}>
+                                    {{ a.task.title }} (Currently: {{ a.status }}, Logged: {{ a.actual_hours }}h)
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- STATUS CHANGE -->
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Update Status *</label>
+                        <select name="status" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit;">
+                            <option value="In Progress">⚡ In Progress</option>
+                            <option value="Completed">✓ Completed (Ready for Manager Review)</option>
+                            <option value="Pending">⏳ Pending</option>
+                        </select>
+                    </div>
+
+                    <!-- HOURS TO LOG -->
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Additional Hours Worked (hrs)</label>
+                        <input type="number" step="0.5" name="additional_hours" placeholder="e.g. 3.5" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit;">
+                        <small style="color: #94a3b8; font-size: 11px;">Adds to your logged execution hours.</small>
+                    </div>
+
+                    <!-- COMPLETION NOTES -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Completion Notes & Work Submission</label>
+                        <textarea name="completion_notes" rows="4" placeholder="Describe the work done, PR links, tests passed, or blockers encountered..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" style="width: 100%; background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
+                        ✓ Submit Progress Update
+                    </button>
+                </form>
+            {% else %}
+                <div style="text-align: center; padding: 30px; color: #64748b;">
+                    <p>You have no active pending tasks right now. All tasks are marked Completed!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- RECENT SUBMISSION HISTORY -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 18px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: grid; place-items: center; font-size: 18px;">📜</div>
+                <div>
+                    <h2 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0;">Submission History</h2>
+                    <small style="color: #64748b;">Past task completions and logged hours</small>
+                </div>
+            </div>
+
+            {% if recent_submissions %}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for s in recent_submissions %}
+                        <div style="padding: 14px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                <strong style="color: #1e293b; font-size: 13px;">{{ s.task.title }}</strong>
+                                <span style="font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: #dcfce7; color: #15803d;">
+                                    {{ s.status }}
+                                </span>
+                            </div>
+                            <p style="font-size: 12px; color: #475569; margin: 0 0 8px 0;">
+                                {{ s.completion_notes|default:"Delivered per sprint specifications." }}
+                            </p>
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8;">
+                                <span>Logged: <strong>{{ s.actual_hours }}h</strong> (Est: {{ s.task.estimated_hours }}h)</span>
+                                <span>{{ s.submitted_at|date:"M d, Y h:i A" }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #94a3b8; font-size: 13px;">No task submissions logged yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function changeTaskAction(assignmentId) {
+    const form = document.getElementById('updateTaskForm');
+    form.action = `/actions/tasks/${assignmentId}/update/`;
+}
+</script>
+{% endblock %}

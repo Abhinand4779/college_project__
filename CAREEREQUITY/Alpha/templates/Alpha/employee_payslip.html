@@ -1,0 +1,151 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Monthly Payslip & Salary Details | CareerEquity AI{% endblock %}
+{% block page_heading %}Salary Details & Payslip{% endblock %}
+{% block page_subtitle %}Official monthly compensation statement & fair market equity verification{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <!-- ACTIONS ROW -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <a href="{% url 'employee_salary' %}" style="color: #6258df; text-decoration: none; font-size: 13px; font-weight: 700;">
+            ← Back to AI Salary Equity Insights
+        </a>
+        <button onclick="window.print()" style="background: #1e293b; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            🖨️ Print / Download Payslip PDF
+        </button>
+    </div>
+
+    <!-- PRINTABLE PAYSLIP CONTAINER -->
+    <div id="printablePayslip" style="background: white; border-radius: 16px; border: 2px solid #e2e8f0; padding: 36px; max-width: 900px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.03);">
+
+        <!-- HEADER -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 24px;">
+            <div>
+                <h1 style="font-size: 24px; font-weight: 900; color: #1e293b; margin: 0 0 4px 0; letter-spacing: -0.5px;">CAREEREQUITY TECH LABS</h1>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">Enterprise Human Capital & AI Equity Systems • Bengaluru, India</p>
+                <small style="color: #94a3b8; font-size: 11px;">CIN: U72200KA2024PTC189201 • support@careerequity.ai</small>
+            </div>
+            <div style="text-align: right;">
+                <span style="display: inline-block; background: #e0e7ff; color: #3730a3; padding: 6px 14px; border-radius: 6px; font-weight: 800; font-size: 13px;">
+                    PAYSLIP • {{ month_year|upper }}
+                </span>
+            </div>
+        </div>
+
+        <!-- EMPLOYEE INFO GRID -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 28px; font-size: 12px;">
+            <div>
+                <div style="margin-bottom: 6px;">Employee ID: <strong style="color: #1e293b;">{{ employee.employee_id }}</strong></div>
+                <div style="margin-bottom: 6px;">Employee Name: <strong style="color: #1e293b;">{{ profile.full_name }}</strong></div>
+                <div>Department: <strong style="color: #1e293b;">{{ employee.department.name }}</strong></div>
+            </div>
+            <div>
+                <div style="margin-bottom: 6px;">Designation: <strong style="color: #1e293b;">{{ employee.position.title }}</strong></div>
+                <div style="margin-bottom: 6px;">Joining Date: <strong style="color: #1e293b;">{{ employee.joining_date|default:"Jan 15, 2023" }}</strong></div>
+                <div>Annual CTC: <strong style="color: #1e293b;">₹{{ annual_ctc }}</strong></div>
+            </div>
+        </div>
+
+        <!-- SALARY EARNINGS & DEDUCTIONS TABLE -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; margin-bottom: 24px; font-size: 13px;">
+            <!-- EARNINGS -->
+            <div style="border-right: 1px solid #cbd5e1;">
+                <div style="background: #f1f5f9; padding: 10px 14px; font-weight: 800; color: #1e293b; border-bottom: 1px solid #cbd5e1;">
+                    EARNINGS (₹)
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">
+                    <span>Basic Salary (50%)</span>
+                    <strong>₹{{ basic_pay }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">
+                    <span>House Rent Allowance (HRA)</span>
+                    <strong>₹{{ hra }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">
+                    <span>Special Allowance</span>
+                    <strong>₹{{ special_allowance }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 12px 14px; background: #fafafa; font-weight: 800; color: #1e293b;">
+                    <span>Gross Earnings</span>
+                    <span>₹{{ monthly_gross }}</span>
+                </div>
+            </div>
+
+            <!-- DEDUCTIONS -->
+            <div>
+                <div style="background: #f1f5f9; padding: 10px 14px; font-weight: 800; color: #1e293b; border-bottom: 1px solid #cbd5e1;">
+                    DEDUCTIONS (₹)
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">
+                    <span>Provident Fund (PF - 12%)</span>
+                    <strong>₹{{ provident_fund }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">
+                    <span>Professional Tax (PT)</span>
+                    <strong>₹{{ professional_tax }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #f1f5f9;">
+                    <span>Income Tax (TDS)</span>
+                    <strong>₹{{ income_tax_tds }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 12px 14px; background: #fafafa; font-weight: 800; color: #ef4444;">
+                    <span>Total Deductions</span>
+                    <span>₹{{ total_deductions }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- NET PAY HIGHLIGHT -->
+        <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+                <span style="font-size: 11px; font-weight: 800; color: #15803d; letter-spacing: 1px; text-transform: uppercase;">NET SALARY IN-HAND</span>
+                <div style="font-size: 12px; color: #166534; margin-top: 2px;">Transferred to primary bank account on 30th</div>
+            </div>
+            <div style="font-size: 32px; font-weight: 900; color: #14532d;">
+                ₹{{ net_pay }}
+            </div>
+        </div>
+
+        <!-- AI EQUITY AUDIT CERTIFICATION STAMP -->
+        <div style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 10px; padding: 14px 18px; font-size: 11px; color: #475569; line-height: 1.6;">
+            <strong>🤖 AI Equity Audit Certification:</strong> This compensation has been verified by the CareerEquity AI Random Forest Regressor Model. Predicted Fair Market Band for {{ employee.position.title }} ({{ employee.experience_years }} yrs exp) is <strong>₹{{ salary_profile.fair_market_minimum }} - ₹{{ salary_profile.fair_market_maximum }}</strong>. Equity Status: <span style="font-weight: 700; color: #15803d;">{{ salary_profile.equity_status }}</span>.
+        </div>
+
+        <!-- SIGNATURES FOOTER -->
+        <div style="display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">
+            <div>
+                <div style="font-weight: 700; color: #1e293b;">Eleanor Vance</div>
+                <div>Director of People & Equity (HR Admin)</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-weight: 700; color: #1e293b;">CareerEquity AI Platform</div>
+                <div>Electronically Generated Document</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printablePayslip, #printablePayslip * {
+        visibility: visible;
+    }
+    #printablePayslip {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+}
+</style>
+{% endblock %}

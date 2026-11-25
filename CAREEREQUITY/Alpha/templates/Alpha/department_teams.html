@@ -1,0 +1,84 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Department Teams | CareerEquity AI{% endblock %}
+{% block page_heading %}Department Teams{% endblock %}
+{% block page_subtitle %}Organizational hierarchy and team rosters under {{ department.name }}{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">
+                    Teams & Rosters in {{ department.name }}
+                </h2>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">
+                    Total {{ total_teams }} teams reporting into Department Head {{ profile.full_name }}
+                </p>
+            </div>
+            <a href="{% url 'department_dashboard' %}" style="color: #6258df; text-decoration: none; font-size: 13px; font-weight: 700;">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+        {% for tdata in team_data %}
+            <div style="margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                <!-- TEAM HEADER -->
+                <div style="background: #f8fafc; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 16px; color: #1e293b;">{{ tdata.team.name }}</strong>
+                        <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                            Team Manager: <strong style="color: #4338ca;">{{ tdata.team.team_manager.get_full_name|default:tdata.team.team_manager.username }}</strong> • {{ tdata.members_count }} Members
+                        </div>
+                    </div>
+                    <span style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
+                        Active Division
+                    </span>
+                </div>
+
+                <!-- MEMBERS TABLE -->
+                <div style="padding: 14px 20px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                                <th style="padding: 8px 10px;">Employee</th>
+                                <th style="padding: 8px 10px;">ID</th>
+                                <th style="padding: 8px 10px;">Designation</th>
+                                <th style="padding: 8px 10px;">Experience</th>
+                                <th style="padding: 8px 10px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in tdata.members %}
+                                <tr style="border-bottom: 1px solid #f8fafc;">
+                                    <td style="padding: 10px; font-weight: 700; color: #1e293b;">
+                                        {{ m.user.get_full_name|default:m.user.username }}
+                                    </td>
+                                    <td style="padding: 10px; color: #64748b;">{{ m.employee_id }}</td>
+                                    <td style="padding: 10px; color: #475569;">{{ m.position.title }}</td>
+                                    <td style="padding: 10px; color: #64748b;">{{ m.experience_years }} yrs</td>
+                                    <td style="padding: 10px;">
+                                        <span style="background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Active</span>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" style="padding: 14px; text-align: center; color: #94a3b8;">
+                                        No members assigned to this team yet.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% empty %}
+            <p style="color: #94a3b8; font-size: 13px; text-align: center; padding: 30px;">
+                No teams registered under {{ department.name }}.
+            </p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

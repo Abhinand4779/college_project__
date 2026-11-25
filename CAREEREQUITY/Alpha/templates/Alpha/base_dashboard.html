@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -11,6 +10,58 @@
     <link rel="stylesheet" href="{% static 'Alpha/css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'Alpha/css/employee_pages.css' %}">
     <link rel="stylesheet" href="{% static 'Alpha/css/employee_skills.css' %}">
+
+    <style>
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .notif-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 20px;
+            background: #f0efff;
+            color: #6258df;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .notif-pill:hover {
+            background: #e2dfff;
+            transform: translateY(-1px);
+        }
+        .notif-badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e53e3e;
+            display: inline-block;
+        }
+        .menu-category-title {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: #9aa0b8;
+            padding: 12px 18px 4px 18px;
+            text-transform: uppercase;
+        }
+        .role-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 3px;
+        }
+        .role-tag.hr { background: #fee2e2; color: #b91c1c; }
+        .role-tag.dm { background: #fef3c7; color: #b45309; }
+        .role-tag.tm { background: #e0e7ff; color: #4338ca; }
+        .role-tag.emp { background: #dcfce7; color: #15803d; }
+    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -25,7 +76,7 @@
             <div class="brand-logo">CE</div>
             <div>
                 <h2>CareerEquity</h2>
-                <small>AI Platform</small>
+                <small>Enterprise AI Platform</small>
             </div>
         </div>
 
@@ -36,70 +87,127 @@
 
             <div>
                 <strong>{{ request.user.account_profile.full_name }}</strong>
-                <small>{{ request.user.account_profile.role }}</small>
+                {% if request.user.account_profile.role == "HR Manager/Admin" %}
+                    <span class="role-tag hr">HR Admin</span>
+                {% elif request.user.account_profile.role == "Department Manager" %}
+                    <span class="role-tag dm">Dept Manager</span>
+                {% elif request.user.account_profile.role == "Team Manager" %}
+                    <span class="role-tag tm">Team Manager</span>
+                {% else %}
+                    <span class="role-tag emp">Employee</span>
+                {% endif %}
             </div>
         </div>
 
-        <p class="menu-heading">MAIN MENU</p>
+        <p class="menu-heading">NAVIGATION</p>
 
         <nav class="sidebar-menu">
 
             <a href="{% url 'dashboard' %}"
                class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                Dashboard
+                📊 Dashboard
             </a>
 
+            <!-- 1. HR ADMIN MENU -->
             {% if request.user.account_profile.role == "HR Manager/Admin" %}
-
+                <div class="menu-category-title">HR Management</div>
                 <a href="{% url 'create_employee' %}"
                    class="{% if request.resolver_match.url_name == 'create_employee' %}active{% endif %}">
-                    Create Employee
+                    👤 Create Employee
                 </a>
-
                 <a href="{% url 'hr_task_assignment' %}"
                    class="{% if request.resolver_match.url_name == 'hr_task_assignment' %}active{% endif %}">
-                    Task Assignment
+                    📌 Task Assignment
                 </a>
 
-            {% elif request.user.account_profile.role == "Employee" %}
+            <!-- 2. DEPARTMENT MANAGER MENU -->
+            {% elif request.user.account_profile.role == "Department Manager" %}
+                <div class="menu-category-title">Department Suite</div>
+                <a href="{% url 'department_teams' %}"
+                   class="{% if request.resolver_match.url_name == 'department_teams' %}active{% endif %}">
+                    🏢 Department Teams
+                </a>
+                <a href="{% url 'department_reports' %}"
+                   class="{% if request.resolver_match.url_name == 'department_reports' %}active{% endif %}">
+                    📈 Dept Reports & Budget
+                </a>
 
+            <!-- 3. TEAM MANAGER MENU -->
+            {% elif request.user.account_profile.role == "Team Manager" %}
+                <div class="menu-category-title">Team Operations</div>
+                <a href="{% url 'team_manager_assign_task' %}"
+                   class="{% if request.resolver_match.url_name == 'team_manager_assign_task' %}active{% endif %}">
+                    ➕ Assign Task
+                </a>
+                <a href="{% url 'team_manager_leaves' %}"
+                   class="{% if request.resolver_match.url_name == 'team_manager_leaves' %}active{% endif %}">
+                    🏖️ Leave Approvals
+                </a>
+                <a href="{% url 'team_manager_attendance' %}"
+                   class="{% if request.resolver_match.url_name == 'team_manager_attendance' %}active{% endif %}">
+                    ⏱️ Team Attendance
+                </a>
+                <a href="{% url 'team_manager_feedback' %}"
+                   class="{% if request.resolver_match.url_name == 'team_manager_feedback' %}active{% endif %}">
+                    ⭐ Performance Feedback
+                </a>
+
+            <!-- 4. EMPLOYEE 9 MODULES MENU -->
+            {% elif request.user.account_profile.role == "Employee" %}
+                <div class="menu-category-title">Employee Portal</div>
                 <a href="{% url 'employee_profile' %}"
                    class="{% if request.resolver_match.url_name == 'employee_profile' %}active{% endif %}">
-                    My Profile
+                    👤 1. My Profile
                 </a>
-
-                <a href="{% url 'employee_skills' %}"
-                   class="{% if request.resolver_match.url_name == 'employee_skills' %}active{% endif %}">
-                    My Skills
+                <a href="{% url 'employee_tasks' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_tasks' %}active{% endif %}">
+                    📋 2. My Tasks
                 </a>
-
-                <a href="{% url 'employee_workload' %}"
-                   class="{% if request.resolver_match.url_name == 'employee_workload' %}active{% endif %}">
-                    My Workload
+                <a href="{% url 'employee_task_updates' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_task_updates' %}active{% endif %}">
+                    📝 3. Task Updates
                 </a>
-
+                <a href="{% url 'employee_attendance' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_attendance' %}active{% endif %}">
+                    ⏰ 4. Attendance
+                </a>
+                <a href="{% url 'employee_leaves' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_leaves' %}active{% endif %}">
+                    🏖️ 5. Leave Management
+                </a>
+                <a href="{% url 'employee_performance' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_performance' %}active{% endif %}">
+                    ⭐ 6. Performance
+                </a>
+                <a href="{% url 'employee_notifications' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_notifications' %}active{% endif %}">
+                    🔔 7. Notifications
+                </a>
                 <a href="{% url 'employee_salary' %}"
                    class="{% if request.resolver_match.url_name == 'employee_salary' %}active{% endif %}">
-                    Salary Insights
+                    💰 8. Salary Insights
+                </a>
+                <a href="{% url 'employee_payslip' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_payslip' %}active{% endif %}">
+                    🧾 9. Monthly Payslip
                 </a>
 
+                <div class="menu-category-title">AI Analytics</div>
+                <a href="{% url 'employee_workload' %}"
+                   class="{% if request.resolver_match.url_name == 'employee_workload' %}active{% endif %}">
+                    🧠 AI Workload Model
+                </a>
                 <a href="{% url 'employee_career' %}"
                    class="{% if request.resolver_match.url_name == 'employee_career' %}active{% endif %}">
-                    Career Development
+                    🎯 AI Career Roadmap
                 </a>
-
-                <a href="{% url 'employee_progress' %}"
-                   class="{% if request.resolver_match.url_name == 'employee_progress' %}active{% endif %}">
-                    My Progress
-                </a>
-
             {% endif %}
 
         </nav>
 
         <div class="sidebar-bottom">
             <a href="{% url 'logout_page' %}" class="logout-link">
-                Logout
+                🚪 Logout
             </a>
         </div>
 
@@ -128,16 +236,36 @@
 
                 <p>
                     {% block page_subtitle %}
-                        Welcome to your CareerEquity workspace
+                        Enterprise Role-Based Management System
                     {% endblock %}
                 </p>
             </div>
 
-            <div class="online-status">
-                <span></span> Online
+            <div class="topbar-actions">
+                {% if request.user.account_profile.role == "Employee" %}
+                    <a href="{% url 'employee_notifications' %}" class="notif-pill" title="Notifications">
+                        🔔 <span class="notif-badge-dot"></span> Alerts
+                    </a>
+                {% endif %}
+                <div class="online-status">
+                    <span></span> Online
+                </div>
             </div>
 
         </header>
+
+        {% if messages %}
+            <div style="padding: 15px 30px 0 30px;">
+                {% for message in messages %}
+                    <div style="padding: 12px 18px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; font-weight: 600;
+                        {% if message.tags == 'error' %}background:#fee2e2; color:#991b1b; border: 1px solid #f87171;
+                        {% elif message.tags == 'success' %}background:#dcfce7; color:#166534; border: 1px solid #86efac;
+                        {% else %}background:#e0e7ff; color:#3730a3; border: 1px solid #a5b4fc;{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
         <section class="page-content">
             {% block content %}
@@ -145,7 +273,7 @@
         </section>
 
         <footer class="footer">
-            © {% now "Y" %} CareerEquity AI. All rights reserved.
+            © {% now "Y" %} CareerEquity AI — Enterprise 4-Level Management System. All rights reserved.
         </footer>
 
     </main>

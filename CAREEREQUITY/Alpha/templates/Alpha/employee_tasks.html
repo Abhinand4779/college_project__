@@ -1,0 +1,111 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}My Tasks | CareerEquity AI{% endblock %}
+{% block page_heading %}My Tasks{% endblock %}
+{% block page_subtitle %}Review assigned deliverables, complexity ratings, and deadlines{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <!-- KPI ROW -->
+    <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+        <div class="info-card">
+            <div class="card-icon" style="background: #e0e7ff; color: #4338ca;">📋</div>
+            <div style="font-size: 26px; font-weight: 800; color: #1e1b4b;">{{ total_tasks }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Total Tasks</div>
+            <small style="color: #64748b; font-size: 11px;">Assigned deliverables</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #fef3c7; color: #b45309;">⏳</div>
+            <div style="font-size: 26px; font-weight: 800; color: #78350f;">{{ pending_tasks.count }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Pending Start</div>
+            <small style="color: #64748b; font-size: 11px;">Queued for execution</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #e0f2fe; color: #0369a1;">⚡</div>
+            <div style="font-size: 26px; font-weight: 800; color: #0c4a6e;">{{ in_progress_tasks.count }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">In Progress</div>
+            <small style="color: #64748b; font-size: 11px;">Actively being worked</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #dcfce7; color: #15803d;">✓</div>
+            <div style="font-size: 26px; font-weight: 800; color: #14532d;">{{ completed_tasks.count }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Completed</div>
+            <small style="color: #64748b; font-size: 11px;">Finished & logged</small>
+        </div>
+    </div>
+
+    <!-- MAIN TASKS TABLE -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">All Assigned Tasks</h2>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">Assigned by your Team Manager with complexity weights</p>
+            </div>
+            <a href="{% url 'employee_task_updates' %}" style="background: #6258df; color: white; padding: 9px 16px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700;">
+                📝 Update Task Status / Log Hours →
+            </a>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 12px;">Task Title</th>
+                        <th style="padding: 12px;">Complexity</th>
+                        <th style="padding: 12px;">Est. Hours</th>
+                        <th style="padding: 12px;">Logged Hours</th>
+                        <th style="padding: 12px;">Deadline</th>
+                        <th style="padding: 12px;">Status</th>
+                        <th style="padding: 12px; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in assignments %}
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 14px 12px;">
+                                <div style="font-weight: 700; color: #1e293b;">{{ a.task.title }}</div>
+                                <small style="color: #64748b; font-size: 11px;">{{ a.task.description|truncatechars:70 }}</small>
+                            </td>
+                            <td style="padding: 14px 12px;">
+                                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+                                    {% if a.task.complexity == 'High' %}background: #fee2e2; color: #b91c1c;
+                                    {% elif a.task.complexity == 'Medium' %}background: #fef3c7; color: #b45309;
+                                    {% else %}background: #e0f2fe; color: #0369a1;{% endif %}">
+                                    {{ a.task.complexity }}
+                                </span>
+                            </td>
+                            <td style="padding: 14px 12px; font-weight: 600; color: #475569;">{{ a.task.estimated_hours }}h</td>
+                            <td style="padding: 14px 12px; font-weight: 700; color: #1e293b;">{{ a.actual_hours }}h</td>
+                            <td style="padding: 14px 12px; color: #64748b;">{{ a.task.deadline|default:"No strict deadline" }}</td>
+                            <td style="padding: 14px 12px;">
+                                <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px;
+                                    {% if a.status == 'Completed' %}background:#dcfce7; color:#15803d;
+                                    {% elif a.status == 'In Progress' %}background:#e0e7ff; color:#4338ca;
+                                    {% else %}background:#fef3c7; color:#b45309;{% endif %}">
+                                    {{ a.status }}
+                                </span>
+                            </td>
+                            <td style="padding: 14px 12px; text-align: right;">
+                                <a href="{% url 'employee_task_updates' %}" style="color: #6258df; text-decoration: none; font-weight: 700; font-size: 12px;">
+                                    Update →
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="padding: 30px; text-align: center; color: #94a3b8;">
+                                No tasks assigned to your account yet.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -12,3 +12,4 @@ joblib>=1.3.0
 
 # Database Adapter (Optional for PostgreSQL users; SQLite is built-in)
 psycopg2-binary>=2.9.0
+

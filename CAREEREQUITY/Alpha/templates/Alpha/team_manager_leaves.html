@@ -1,0 +1,101 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Team Leave Approvals | CareerEquity AI{% endblock %}
+{% block page_heading %}Leave Approvals{% endblock %}
+{% block page_subtitle %}Review, approve, or decline team member time-off requests{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">Team Leave Requests</h2>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">Approve or reject leave applications submitted by your team</p>
+            </div>
+            {% if pending_count > 0 %}
+                <span style="background: #fef3c7; color: #b45309; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                    {{ pending_count }} Pending Review
+                </span>
+            {% endif %}
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 12px;">Team Member</th>
+                        <th style="padding: 12px;">Leave Type</th>
+                        <th style="padding: 12px;">Duration</th>
+                        <th style="padding: 12px;">Days</th>
+                        <th style="padding: 12px;">Reason</th>
+                        <th style="padding: 12px;">Status</th>
+                        <th style="padding: 12px; text-align: right;">Review Decision</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in leaves %}
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 14px 12px;">
+                                <strong style="color: #1e293b;">{{ l.employee.user.get_full_name|default:l.employee.user.username }}</strong>
+                                <small style="display: block; color: #64748b; font-size: 11px;">{{ l.employee.employee_id }}</small>
+                            </td>
+                            <td style="padding: 14px 12px; font-weight: 600; color: #475569;">
+                                {{ l.leave_type }}
+                            </td>
+                            <td style="padding: 14px 12px; color: #64748b; font-size: 12px;">
+                                {{ l.start_date|date:"M d" }} - {{ l.end_date|date:"M d, Y" }}
+                            </td>
+                            <td style="padding: 14px 12px; font-weight: 700; color: #1e293b;">
+                                {{ l.days_count }} days
+                            </td>
+                            <td style="padding: 14px 12px; color: #334155; font-size: 12px; max-width: 200px;">
+                                "{{ l.reason }}"
+                            </td>
+                            <td style="padding: 14px 12px;">
+                                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+                                    {% if l.status == 'Approved' %}background:#dcfce7; color:#15803d;
+                                    {% elif l.status == 'Rejected' %}background:#fee2e2; color:#b91c1c;
+                                    {% else %}background:#fef3c7; color:#b45309;{% endif %}">
+                                    {{ l.status }}
+                                </span>
+                            </td>
+                            <td style="padding: 14px 12px; text-align: right;">
+                                {% if l.status == 'Pending' %}
+                                    <div style="display: inline-flex; gap: 6px;">
+                                        <form method="POST" action="{% url 'api_approve_leave' l.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="review_comments" value="Approved by Team Manager.">
+                                            <button type="submit" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                                ✓ Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{% url 'api_reject_leave' l.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="review_comments" value="Delivery conflict on sprint milestone.">
+                                            <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                                ✗ Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <small style="color: #94a3b8; font-size: 11px;">
+                                        {{ l.review_comments|default:"Reviewed" }}
+                                    </small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="padding: 30px; text-align: center; color: #94a3b8;">
+                                No leave requests recorded for your team.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

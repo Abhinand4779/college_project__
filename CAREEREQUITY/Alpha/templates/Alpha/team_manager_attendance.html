@@ -1,0 +1,87 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Team Attendance Management | CareerEquity AI{% endblock %}
+{% block page_heading %}Team Attendance{% endblock %}
+{% block page_subtitle %}Live check-in timestamps and shift completion logs for your engineers{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <!-- TODAY'S TEAM ATTENDANCE STATUS -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">Today's Team Check-In Status</h2>
+                <small style="color: #64748b;">{{ today|date:"l, F d, Y" }}</small>
+            </div>
+            <span style="background: #e0e7ff; color: #4338ca; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;">
+                Live Shift Monitor
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
+            {% for m in team_members %}
+                <div style="padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #1e293b; font-size: 13px; display: block;">{{ m.user.get_full_name|default:m.user.username }}</strong>
+                        <small style="color: #64748b; font-size: 11px;">{{ m.employee_id }} • {{ m.position.title }}</small>
+                    </div>
+                    <div>
+                        <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: #dcfce7; color: #15803d;">
+                            ● Checked In
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- RECENT 30-DAY LOGS -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">Team Attendance History Logs</h2>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 12px;">Team Member</th>
+                        <th style="padding: 12px;">Date</th>
+                        <th style="padding: 12px;">Check In</th>
+                        <th style="padding: 12px;">Check Out</th>
+                        <th style="padding: 12px;">Hours Logged</th>
+                        <th style="padding: 12px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in recent_logs %}
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px;">
+                                <strong style="color: #1e293b;">{{ r.employee.user.get_full_name|default:r.employee.user.username }}</strong>
+                            </td>
+                            <td style="padding: 12px; color: #475569;">{{ r.date|date:"D, M d, Y" }}</td>
+                            <td style="padding: 12px; color: #10b981; font-weight: 600;">{{ r.check_in|time:"h:i A"|default:"--" }}</td>
+                            <td style="padding: 12px; color: #ef4444; font-weight: 600;">{{ r.check_out|time:"h:i A"|default:"--" }}</td>
+                            <td style="padding: 12px; font-weight: 700; color: #1e293b;">{{ r.working_hours }}h</td>
+                            <td style="padding: 12px;">
+                                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+                                    {% if r.status == 'Present' %}background: #dcfce7; color: #15803d;
+                                    {% elif r.status == 'Late' %}background: #fef3c7; color: #b45309;
+                                    {% else %}background: #fee2e2; color: #b91c1c;{% endif %}">
+                                    {{ r.status }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="padding: 30px; text-align: center; color: #94a3b8;">
+                                No attendance records found for this team.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

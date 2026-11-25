@@ -1,0 +1,159 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Daily Attendance & Shift Records | CareerEquity AI{% endblock %}
+{% block page_heading %}Daily Attendance{% endblock %}
+{% block page_subtitle %}Live check-in / check-out records and historical attendance tracking{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <!-- TOP SECTION: LIVE PUNCH CLOCK & MONTHLY STATS -->
+    <div style="display: grid; grid-template-columns: 1.2fr 2fr; gap: 24px; margin-bottom: 24px;">
+
+        <!-- LIVE PUNCH CLOCK CARD -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; text-align: center;">
+            <span style="font-size: 11px; font-weight: 800; color: #6258df; letter-spacing: 1.2px; text-transform: uppercase;">
+                LIVE ATTENDANCE TERMINAL
+            </span>
+            <div style="font-size: 34px; font-weight: 800; color: #1e293b; margin: 10px 0 4px 0;">
+                {{ now_time }}
+            </div>
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 20px;">
+                {{ today|date:"l, F d, Y" }}
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-around;">
+                    <div>
+                        <small style="color: #64748b; font-size: 11px; display: block;">CHECK IN</small>
+                        <strong style="color: #10b981; font-size: 15px;">
+                            {{ today_record.check_in|time:"h:i A"|default:"--:--" }}
+                        </strong>
+                    </div>
+                    <div style="border-right: 1px solid #e2e8f0;"></div>
+                    <div>
+                        <small style="color: #64748b; font-size: 11px; display: block;">CHECK OUT</small>
+                        <strong style="color: #ef4444; font-size: 15px;">
+                            {{ today_record.check_out|time:"h:i A"|default:"--:--" }}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            {% if not today_record or not today_record.check_in %}
+                <form method="POST" action="{% url 'api_check_in' %}">
+                    {% csrf_token %}
+                    <button type="submit" style="width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s;">
+                        👉 Check In (Punch In)
+                    </button>
+                </form>
+            {% elif not today_record.check_out %}
+                <form method="POST" action="{% url 'api_check_out' %}">
+                    {% csrf_token %}
+                    <button type="submit" style="width: 100%; background: #ef4444; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s;">
+                        👉 Check Out (Punch Out)
+                    </button>
+                </form>
+            {% else %}
+                <div style="background: #dcfce7; color: #15803d; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px;">
+                    ✓ Shift Completed for Today ({{ today_record.working_hours }} hrs)
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 30-DAY STATS SUMMARY -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <h3 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">30-Day Attendance Overview</h3>
+                <p style="font-size: 12px; color: #64748b; margin: 0 0 20px 0;">Punctuality metrics computed for salary payroll and workload evaluation</p>
+
+                <div class="cards-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 0;">
+                    <div class="info-card" style="box-shadow: none; background: #f8fafc;">
+                        <div style="font-size: 24px; font-weight: 800; color: #15803d;">{{ present_count }}</div>
+                        <div style="font-size: 12px; font-weight: 600; color: #475569;">Days Present</div>
+                        <small style="color: #64748b; font-size: 10px;">Logged shifts</small>
+                    </div>
+
+                    <div class="info-card" style="box-shadow: none; background: #f8fafc;">
+                        <div style="font-size: 24px; font-weight: 800; color: #b45309;">{{ late_count }}</div>
+                        <div style="font-size: 12px; font-weight: 600; color: #475569;">Late Arrivals</div>
+                        <small style="color: #64748b; font-size: 10px;">> 15 min grace</small>
+                    </div>
+
+                    <div class="info-card" style="box-shadow: none; background: #f8fafc;">
+                        <div style="font-size: 24px; font-weight: 800; color: #4338ca;">{{ attendance_rate }}%</div>
+                        <div style="font-size: 12px; font-weight: 600; color: #475569;">Attendance Rate</div>
+                        <small style="color: #64748b; font-size: 10px;">Compliance score</small>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 14px;">
+                <strong style="color: #1e40af; font-size: 12px; display: block;">💡 AI Workload Correlation:</strong>
+                <span style="color: #3b82f6; font-size: 11px;">
+                    Daily hours logged feed directly into the Random Forest Burnout Classifier to detect consecutive over-work fatigue patterns.
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ATTENDANCE LOG TABLE -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">Attendance Log History</h2>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 12px;">Date</th>
+                        <th style="padding: 12px;">Check In</th>
+                        <th style="padding: 12px;">Check Out</th>
+                        <th style="padding: 12px;">Working Hours</th>
+                        <th style="padding: 12px;">Status</th>
+                        <th style="padding: 12px;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in attendance_history %}
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px; font-weight: 700; color: #1e293b;">
+                                {{ r.date|date:"D, M d, Y" }}
+                                {% if r.date == today %}<span style="font-size: 10px; background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Today</span>{% endif %}
+                            </td>
+                            <td style="padding: 12px; color: #10b981; font-weight: 600;">
+                                {{ r.check_in|time:"h:i A"|default:"--" }}
+                            </td>
+                            <td style="padding: 12px; color: #ef4444; font-weight: 600;">
+                                {{ r.check_out|time:"h:i A"|default:"--" }}
+                            </td>
+                            <td style="padding: 12px; font-weight: 700; color: #1e293b;">
+                                {{ r.working_hours }} hrs
+                            </td>
+                            <td style="padding: 12px;">
+                                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+                                    {% if r.status == 'Present' %}background: #dcfce7; color: #15803d;
+                                    {% elif r.status == 'Late' %}background: #fef3c7; color: #b45309;
+                                    {% elif r.status == 'On Leave' %}background: #fce7f3; color: #9d174d;
+                                    {% else %}background: #fee2e2; color: #b91c1c;{% endif %}">
+                                    {{ r.status }}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; color: #64748b; font-size: 12px;">
+                                {{ r.notes|default:"Regular working day" }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" style="padding: 30px; text-align: center; color: #94a3b8;">
+                                No attendance records logged yet.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

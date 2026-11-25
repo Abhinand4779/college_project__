@@ -1,0 +1,94 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Notifications & Alerts | CareerEquity AI{% endblock %}
+{% block page_heading %}Notification Center{% endblock %}
+{% block page_subtitle %}Task assignments, deadline reminders, leave approvals, and company announcements{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+
+        <!-- HEADER WITH MARK ALL READ -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0;">Your Notifications</h2>
+                {% if unread_count > 0 %}
+                    <span style="background: #ef4444; color: white; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px;">
+                        {{ unread_count }} Unread
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if unread_count > 0 %}
+                <form method="POST" action="{% url 'api_mark_all_notifications_read' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                        ✓ Mark All as Read
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+
+        <!-- NOTIFICATION LIST -->
+        {% if notifications %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for n in notifications %}
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 16px; border-radius: 12px;
+                        {% if not n.is_read %}background: #eff6ff; border: 1px solid #bfdbfe;
+                        {% else %}background: #f8fafc; border: 1px solid #e2e8f0;{% endif %}">
+
+                        <div style="display: flex; gap: 14px; align-items: flex-start;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+                                {% if n.category == 'Task' %}background: #e0e7ff; color: #4338ca;
+                                {% elif n.category == 'Leave' %}background: #dcfce7; color: #15803d;
+                                {% elif n.category == 'Attendance' %}background: #fef3c7; color: #b45309;
+                                {% elif n.category == 'Performance' %}background: #fae8ff; color: #86198f;
+                                {% else %}background: #e2e8f0; color: #334155;{% endif %}">
+                                {% if n.category == 'Task' %}📋
+                                {% elif n.category == 'Leave' %}🏖️
+                                {% elif n.category == 'Attendance' %}⏰
+                                {% elif n.category == 'Performance' %}⭐
+                                {% else %}📢{% endif %}
+                            </div>
+
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <strong style="color: #1e293b; font-size: 14px;">{{ n.title }}</strong>
+                                    <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(0,0,0,0.06); color: #475569;">
+                                        {{ n.category }}
+                                    </span>
+                                    {% if not n.is_read %}
+                                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span>
+                                    {% endif %}
+                                </div>
+                                <p style="color: #475569; font-size: 13px; margin: 0 0 6px 0; line-height: 1.5;">
+                                    {{ n.message }}
+                                </p>
+                                <small style="color: #94a3b8; font-size: 11px;">
+                                    {{ n.created_at|date:"M d, Y h:i A" }}
+                                </small>
+                            </div>
+                        </div>
+
+                        {% if not n.is_read %}
+                            <form method="POST" action="{% url 'api_mark_notification_read' n.id %}" style="display: inline; flex-shrink: 0;">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: 1px solid #bfdbfe; color: #2563eb; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                    Mark Read
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #94a3b8; font-size: 13px; text-align: center; padding: 30px 0;">
+                No notifications to display.
+            </p>
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

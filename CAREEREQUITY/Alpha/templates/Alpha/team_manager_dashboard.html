@@ -1,0 +1,217 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Team Manager Dashboard | CareerEquity AI{% endblock %}
+{% block page_heading %}Team Manager Workspace{% endblock %}
+{% block page_subtitle %}Assign tasks, monitor team progress, manage attendance, and provide feedback{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <!-- WELCOME HERO BANNER -->
+    <div class="hero-card" style="background: linear-gradient(120deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%);">
+        <div>
+            <span class="eyebrow" style="color: #c7d2fe; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px;">
+                TEAM MANAGER • LEVEL 3
+            </span>
+            <h1 style="font-size: 26px; font-weight: 800; margin: 10px 0 6px 0; color: white;">Team Lead: {{ profile.full_name }}</h1>
+            <p style="color: #e0e7ff; font-size: 13px; line-height: 1.6; max-width: 650px;">
+                Managing: <strong>{{ team.name|default:"Core Platform Engineering" }}</strong> •
+                Department: <strong>{{ team.department.name|default:"Engineering" }}</strong> •
+                Team Size: <strong>{{ total_members }} Engineers</strong>
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'team_manager_assign_task' %}" style="background: #10b981; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700;">
+                ➕ Assign Task
+            </a>
+            <a href="{% url 'team_manager_leaves' %}" style="background: rgba(255,255,255,0.15); color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700;">
+                🏖️ Leaves ({{ pending_leaves_count }})
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 OPERATIONAL KPI CARDS -->
+    <div class="cards-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+        <div class="info-card">
+            <div class="card-icon" style="background: #e0e7ff; color: #4338ca;">👥</div>
+            <div style="font-size: 26px; font-weight: 800; color: #1e1b4b;">{{ total_members }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Team Members</div>
+            <small style="color: #64748b; font-size: 11px;">Active engineers</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #fef3c7; color: #b45309;">⏳</div>
+            <div style="font-size: 26px; font-weight: 800; color: #78350f;">{{ pending_tasks_count }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Active Team Tasks</div>
+            <small style="color: #64748b; font-size: 11px;">{{ completed_tasks_count }} completed</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #fee2e2; color: #b91c1c;">⚠️</div>
+            <div style="font-size: 26px; font-weight: 800; color: #991b1b;">{{ team_burnout_alerts }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Burnout Alerts</div>
+            <small style="color: #64748b; font-size: 11px;">AI flagged overload</small>
+        </div>
+
+        <div class="info-card">
+            <div class="card-icon" style="background: #dcfce7; color: #15803d;">🏖️</div>
+            <div style="font-size: 26px; font-weight: 800; color: #14532d;">{{ pending_leaves_count }}</div>
+            <div style="font-size: 13px; font-weight: 600; color: #475569;">Pending Leaves</div>
+            <small style="color: #64748b; font-size: 11px;">Awaiting your approval</small>
+        </div>
+    </div>
+
+    <!-- TEAM MEMBERS ROSTER & WORKLOAD TABLE -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div>
+                <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0;">Team Members & AI Workload Monitor</h2>
+                <p style="font-size: 12px; color: #64748b; margin: 0;">Live capacity tracking powered by Random Forest ML engine</p>
+            </div>
+            <a href="{% url 'team_manager_feedback' %}" style="color: #6258df; text-decoration: none; font-size: 12px; font-weight: 700;">
+                ⭐ Submit Performance Review →
+            </a>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
+                        <th style="padding: 12px;">Employee</th>
+                        <th style="padding: 12px;">Position</th>
+                        <th style="padding: 12px;">Logged Hours</th>
+                        <th style="padding: 12px;">Workload Score</th>
+                        <th style="padding: 12px;">AI Status</th>
+                        <th style="padding: 12px; text-align: right;">Quick Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in team_workload %}
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px;">
+                                <strong style="color: #1e293b;">{{ item.employee.user.get_full_name|default:item.employee.user.username }}</strong>
+                                <small style="display: block; color: #64748b; font-size: 11px;">{{ item.employee.employee_id }}</small>
+                            </td>
+                            <td style="padding: 12px; color: #475569;">
+                                {{ item.employee.position.title }}
+                            </td>
+                            <td style="padding: 12px; font-weight: 700; color: #1e293b;">
+                                {{ item.analysis.estimated_hours }} hrs
+                            </td>
+                            <td style="padding: 12px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 80px; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                        <div style="width: {{ item.analysis.workload_score }}%; height: 100%;
+                                            {% if item.analysis.workload_score > 85 %}background: #ef4444;
+                                            {% elif item.analysis.workload_score >= 40 %}background: #10b981;
+                                            {% else %}background: #3b82f6;{% endif %}">
+                                        </div>
+                                    </div>
+                                    <span style="font-weight: 700; font-size: 12px;">{{ item.analysis.workload_score }}%</span>
+                                </div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+                                    {% if item.analysis.workload_level == 'Overloaded' %}background: #fee2e2; color: #b91c1c;
+                                    {% elif item.analysis.workload_level == 'Balanced' %}background: #dcfce7; color: #15803d;
+                                    {% else %}background: #e0f2fe; color: #0369a1;{% endif %}">
+                                    {{ item.analysis.workload_level }}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; text-align: right;">
+                                <a href="{% url 'team_manager_assign_task' %}" style="font-size: 11px; font-weight: 700; background: #f1f5f9; color: #475569; padding: 5px 9px; border-radius: 6px; text-decoration: none; margin-right: 4px;">
+                                    + Task
+                                </a>
+                                <a href="{% url 'team_manager_feedback' %}" style="font-size: 11px; font-weight: 700; background: #fef3c7; color: #b45309; padding: 5px 9px; border-radius: 6px; text-decoration: none;">
+                                    ★ Review
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PENDING LEAVES & RECENT ASSIGNMENTS SPLIT -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+        <!-- PENDING LEAVE APPROVALS -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0;">Pending Leave Approvals</h3>
+                <a href="{% url 'team_manager_leaves' %}" style="color: #6258df; text-decoration: none; font-size: 12px; font-weight: 700;">View All →</a>
+            </div>
+
+            {% if pending_leaves %}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for l in pending_leaves %}
+                        <div style="padding: 14px; border-radius: 10px; background: #fffbeb; border: 1px solid #fef3c7;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                                <div>
+                                    <strong style="color: #1e293b; font-size: 13px;">{{ l.employee.user.get_full_name|default:l.employee.user.username }}</strong>
+                                    <small style="color: #b45309; font-size: 11px; display: block;">{{ l.leave_type }} ({{ l.days_count }} days: {{ l.start_date|date:"M d" }} - {{ l.end_date|date:"M d" }})</small>
+                                </div>
+                                <span style="font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px;">Pending</span>
+                            </div>
+                            <p style="font-size: 12px; color: #475569; margin: 0 0 10px 0;">"{{ l.reason }}"</p>
+
+                            <!-- LIVE ACTION BUTTONS FOR THE MANAGER -->
+                            <div style="display: flex; gap: 8px;">
+                                <form method="POST" action="{% url 'api_approve_leave' l.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="review_comments" value="Approved by Team Manager. Coverage verified.">
+                                    <button type="submit" style="background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                        ✓ Approve
+                                    </button>
+                                </form>
+                                <form method="POST" action="{% url 'api_reject_leave' l.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="review_comments" value="Critical release deadline on selected dates.">
+                                    <button type="submit" style="background: #ef4444; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                        ✗ Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #94a3b8; font-size: 13px;">No pending leave requests from team members.</p>
+            {% endif %}
+        </div>
+
+        <!-- RECENT TEAM TASKS -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 16px; font-weight: 800; color: #1e293b; margin: 0;">Active Team Deliverables</h3>
+                <a href="{% url 'team_manager_assign_task' %}" style="color: #6258df; text-decoration: none; font-size: 12px; font-weight: 700;">+ New Task</a>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                {% for a in team_assignments %}
+                    <div style="padding: 12px 14px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: #1e293b;">{{ a.task.title }}</div>
+                            <small style="color: #64748b; font-size: 11px;">
+                                Assigned: <strong>{{ a.employee.user.get_full_name|default:a.employee.user.username }}</strong> • Due: {{ a.task.deadline|default:"Ongoing" }}
+                            </small>
+                        </div>
+                        <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+                            {% if a.status == 'Completed' %}background:#dcfce7; color:#15803d;
+                            {% elif a.status == 'In Progress' %}background:#e0e7ff; color:#4338ca;
+                            {% else %}background:#fef3c7; color:#b45309;{% endif %}">
+                            {{ a.status }}
+                        </span>
+                    </div>
+                {% empty %}
+                    <p style="color: #94a3b8; font-size: 13px;">No tasks assigned yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

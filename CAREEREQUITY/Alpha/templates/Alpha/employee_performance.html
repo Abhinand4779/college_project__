@@ -1,0 +1,114 @@
+{% extends 'Alpha/base_dashboard.html' %}
+
+{% block title %}Performance & Growth | CareerEquity AI{% endblock %}
+{% block page_heading %}Performance & Growth{% endblock %}
+{% block page_subtitle %}Manager evaluations, qualitative feedback notes, and AI promotion readiness{% endblock %}
+
+{% block content %}
+<div class="employee-page">
+
+    <!-- TOP SECTION: RATING & AI PROMOTION READINESS GAUGE -->
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; margin-bottom: 24px;">
+
+        <!-- MANAGER PERFORMANCE RATING CARD -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; text-align: center;">
+            <div style="font-size: 11px; font-weight: 800; color: #86198f; letter-spacing: 1.2px; text-transform: uppercase;">
+                MANAGER EVALUATION SCORE
+            </div>
+            <div style="font-size: 44px; font-weight: 800; color: #701a75; margin: 10px 0 4px 0;">
+                {{ avg_rating }} <span style="font-size: 24px; color: #f59e0b;">★</span>
+            </div>
+            <div style="font-size: 13px; color: #64748b; margin-bottom: 20px;">
+                Overall Performance Rating (Out of 5.0)
+            </div>
+
+            <div style="background: #faf5ff; border: 1px solid #f3e8ff; border-radius: 12px; padding: 14px; text-align: left;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                    <span style="font-weight: 700; color: #6b21a8;">Technical Ownership:</span>
+                    <strong style="color: #7e22ce;">4.8 / 5.0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                    <span style="font-weight: 700; color: #6b21a8;">Delivery & Timeliness:</span>
+                    <strong style="color: #7e22ce;">4.6 / 5.0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                    <span style="font-weight: 700; color: #6b21a8;">Collaboration & Leadership:</span>
+                    <strong style="color: #7e22ce;">4.7 / 5.0</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI PROMOTION READINESS INDEX CARD -->
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div>
+                    <span style="font-size: 11px; font-weight: 800; color: #b45309; letter-spacing: 1.2px; text-transform: uppercase;">
+                        AI CAREER PROGRESSION ADVISOR
+                    </span>
+                    <h3 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 4px 0 0 0;">
+                        Promotion Readiness: {{ career_readiness.readiness_percentage }}%
+                    </h3>
+                </div>
+                <span style="font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 8px; background: #fef3c7; color: #b45309;">
+                    Stage {{ career_readiness.current_stage_number }} of 4
+                </span>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+                Aspiring Target: <strong>{{ employee.target_position.title|default:"Senior Systems Engineer" }}</strong>
+            </p>
+
+            <div style="width: 100%; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin-bottom: 18px;">
+                <div style="width: {{ career_readiness.readiness_percentage }}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #10b981);"></div>
+            </div>
+
+            <!-- SKILL GAPS BREAKDOWN -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px;">
+                    <strong style="color: #166534; font-size: 16px; display: block;">{{ career_readiness.matched_skills_count|default:"3" }}</strong>
+                    <small style="color: #15803d; font-size: 11px; font-weight: 700;">Matched Skills</small>
+                </div>
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px; border-radius: 8px;">
+                    <strong style="color: #1e40af; font-size: 16px; display: block;">{{ career_readiness.developing_skills_count|default:"1" }}</strong>
+                    <small style="color: #1d4ed8; font-size: 11px; font-weight: 700;">Developing</small>
+                </div>
+                <div style="background: #fff7ed; border: 1px solid #fed7aa; padding: 10px; border-radius: 8px;">
+                    <strong style="color: #9a3412; font-size: 16px; display: block;">{{ career_readiness.missing_skills_count|default:"1" }}</strong>
+                    <small style="color: #c2410c; font-size: 11px; font-weight: 700;">Missing</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MANAGER QUALITATIVE FEEDBACK NOTES -->
+    <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #1e293b; margin: 0 0 16px 0;">Manager Evaluation Reviews & Feedback</h2>
+
+        {% if reviews %}
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                {% for r in reviews %}
+                    <div style="padding: 18px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div>
+                                <strong style="font-size: 14px; color: #1e293b;">Evaluation Period: {{ r.review_period }}</strong>
+                                <span style="font-size: 12px; color: #64748b; margin-left: 8px;">Reviewed by: {{ r.reviewer.get_full_name|default:r.reviewer.username }}</span>
+                            </div>
+                            <span style="font-size: 14px; font-weight: 800; color: #f59e0b; background: #fffbeb; padding: 3px 10px; border-radius: 6px; border: 1px solid #fef3c7;">
+                                {{ r.rating }} ★
+                            </span>
+                        </div>
+                        <p style="font-size: 13px; color: #334155; line-height: 1.6; margin: 0 0 10px 0;">
+                            "{{ r.feedback }}"
+                        </p>
+                        <small style="color: #94a3b8; font-size: 11px;">Submitted on {{ r.created_at|date:"F d, Y" }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #94a3b8; font-size: 13px;">No manager performance reviews published yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
