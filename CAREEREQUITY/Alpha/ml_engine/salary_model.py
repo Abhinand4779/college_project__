@@ -182,8 +182,11 @@ class SalaryEquityPredictor:
         return {
             "current_salary": current_salary,
             "predicted_median": pred_median,
+            "fair_market_median": pred_median,
             "min_range": min_range,
+            "fair_market_minimum": min_range,
             "max_range": max_range,
+            "fair_market_maximum": max_range,
             "equity_status": equity_status,
             "equity_badge": equity_badge,
             "diff_text": diff_text,
