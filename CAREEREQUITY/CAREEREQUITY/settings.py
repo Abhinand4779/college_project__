@@ -150,15 +150,27 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 CSRF_FAILURE_VIEW = 'Alpha.views.custom_csrf_failure_view'
 
-# Email Configuration (Console Backend for Development/Demo + SMTP Configurable)
+# Email Configuration (Supports live Gmail SMTP delivery & local fallback)
 import os
-EMAIL_BACKEND = os.getenv('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+from dotenv import load_dotenv
+
+# Automatically load .env from project root or settings folder
+load_dotenv(os.path.join(BASE_DIR.parent, '.env'))
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = 'CareerEquity AI <noreply@careerequity.ai>'
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 't')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'prtanya53@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '').strip()
+
+# Automatically switch to live SMTP if EMAIL_HOST_PASSWORD is provided; otherwise fallback to console
+if EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = os.getenv('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+else:
+    EMAIL_BACKEND = os.getenv('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+
+DEFAULT_FROM_EMAIL = f'CareerEquity AI <{EMAIL_HOST_USER}>'
 
 
 

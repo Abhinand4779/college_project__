@@ -491,30 +491,44 @@ If you did not request this password reset, you can safely ignore this email.
             </div>
             """
 
+            email_dispatched = False
+            smtp_error = None
+            is_smtp = getattr(settings, "EMAIL_BACKEND", "").endswith("smtp.EmailBackend")
+
             try:
                 send_mail(
                     subject=subject,
                     message=plain_message,
-                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "CareerEquity AI <noreply@careerequity.ai>"),
+                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", f"CareerEquity AI <{getattr(settings, 'EMAIL_HOST_USER', '')}>"),
                     recipient_list=[target_email],
                     html_message=html_message,
                     fail_silently=False,
                 )
                 email_dispatched = True
-            except Exception:
+                if is_smtp:
+                    messages.success(
+                        request,
+                        f"Reset email dispatched to your inbox ({target_email}) via SMTP! Please check your Gmail inbox and spam folder."
+                    )
+                else:
+                    messages.info(
+                        request,
+                        f"Reset link generated for {target_email}. (To receive live emails in Gmail, provide a 16-character Google App Password)."
+                    )
+            except Exception as e:
                 email_dispatched = False
+                smtp_error = str(e)
+                messages.warning(
+                    request,
+                    f"SMTP dispatch issue: {smtp_error}. Please configure a Google App Password for live Gmail delivery."
+                )
 
             # Dispatch in-app notification
             Notification.objects.create(
                 user=user,
                 title="Password Reset Email Dispatched",
-                message=f"A secure JWT reset link was sent to {target_email}. Valid for 30 minutes.",
+                message=f"A secure JWT reset link was generated for {target_email}. Valid for 30 minutes.",
                 category="Security"
-            )
-
-            messages.success(
-                request,
-                f"Reset link successfully sent to {target_email}! Please check your inbox (and spam folder)."
             )
         else:
             messages.error(
@@ -530,6 +544,8 @@ If you did not request this password reset, you can safely ignore this email.
             "reset_user": reset_user,
             "target_email": target_email,
             "email_dispatched": email_dispatched,
+            "is_smtp": getattr(settings, "EMAIL_BACKEND", "").endswith("smtp.EmailBackend"),
+            "smtp_error": smtp_error,
         }
     )
 
@@ -539,10 +555,8 @@ If you did not request this password reset, you can safely ignore this email.
 def password_reset_confirm(request, token):
     """
     Validates the JWT token and allows the user to securely set a new password.
+    Always allows the user to view and submit the form even if an old session is active.
     """
-    if request.user.is_authenticated:
-        return redirect("dashboard")
-
     user, error_msg = verify_jwt_reset_token(token)
 
     if error_msg:
@@ -587,6 +601,10 @@ def password_reset_confirm(request, token):
         # Set new password
         user.set_password(new_password)
         user.save()
+
+        # Cleanly log out any active session so the user can authenticate with the new password
+        if request.user.is_authenticated:
+            logout(request)
 
         Notification.objects.create(
             user=user,
