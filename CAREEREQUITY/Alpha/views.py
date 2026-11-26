@@ -229,6 +229,9 @@ def login_page(request):
                 request.session.set_expiry(0)
 
             messages.success(request, f"Welcome back, {account.full_name}!")
+            next_url = request.POST.get("next") or request.GET.get("next")
+            if next_url and next_url.startswith("/") and not next_url.startswith("//"):
+                return redirect(next_url)
             return redirect("dashboard")
 
         else:
