@@ -409,13 +409,11 @@ def password_reset_request(request):
     """
     Handles user requests for a JWT-based password reset link.
     """
-    if request.user.is_authenticated:
-        return redirect("dashboard")
-
     generated_link = None
     reset_user = None
     target_email = None
     email_dispatched = False
+    smtp_error = None
 
     if request.method == "POST":
         login_input = request.POST.get("login_input", "").strip()
