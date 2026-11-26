@@ -17,7 +17,7 @@
         <div>
             <span class="task-eyebrow">WORKFORCE MANAGEMENT</span>
             <h1>Task Assignment</h1>
-            <p>Create tasks and distribute work among employees.</p>
+            <p>Create tasks and distribute work among teams.</p>
         </div>
     </div>
 
@@ -39,7 +39,7 @@
                 <div class="task-panel-icon">+</div>
                 <div>
                     <h2>Create New Task</h2>
-                    <p>Enter task details and assign an employee.</p>
+                    <p>Enter task details and assign to a team.</p>
                 </div>
             </div>
 
@@ -63,14 +63,13 @@
                 </div>
 
                 <div class="task-form-group">
-                    <label>Assign Employee</label>
-                    <select name="employee" required>
-                        <option value="">Select employee</option>
+                    <label>Assign Team</label>
+                    <select name="team" required>
+                        <option value="">Select team</option>
 
-                        {% for employee in employees %}
-                            <option value="{{ employee.id }}">
-                                {{ employee.user.get_full_name|default:employee.user.username }}
-                                ({{ employee.employee_id }})
+                        {% for team in teams %}
+                            <option value="{{ team.id }}">
+                                {{ team.name }} ({{ team.department.name }})
                             </option>
                         {% endfor %}
                     </select>
@@ -121,7 +120,7 @@
             <div class="task-panel-heading">
                 <div>
                     <h2>Assigned Tasks</h2>
-                    <p>Overview of tasks assigned to employees.</p>
+                    <p>Overview of tasks assigned to teams.</p>
                 </div>
 
                 <span class="task-count">{{ assignments|length }} Tasks</span>
@@ -150,8 +149,8 @@
 
                             <div class="assigned-task-meta">
                                 <span>
-                                    <strong>Employee:</strong>
-                                    {{ assignment.employee.user.get_full_name|default:assignment.employee.user.username }}
+                                    <strong>Team:</strong>
+                                    {{ assignment.employee.team.name|default:assignment.employee.department.name }}
                                 </span>
 
                                 <span>

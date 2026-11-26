@@ -139,6 +139,7 @@ def get_hr_assignments(request):
         "employee__user",
         "employee__department",
         "employee__position",
+        "employee__team",
         "task"
     )
 
@@ -1102,12 +1103,14 @@ def hr_task_assignment(request):
         )
         return redirect("dashboard")
 
+    teams = Team.objects.all().select_related("department", "team_manager").order_by("name")
     employees = get_hr_employees(request)
 
     if request.method == "POST":
 
         title = request.POST.get("title", "").strip()
         description = request.POST.get("description", "").strip()
+        team_id = request.POST.get("team") or request.POST.get("team_id")
         employee_id = request.POST.get("employee")
         complexity = request.POST.get("complexity", "").strip()
         estimated_hours_input = request.POST.get(
@@ -1119,7 +1122,7 @@ def hr_task_assignment(request):
 
         if not all([
             title,
-            employee_id,
+            (team_id or employee_id),
             complexity,
             estimated_hours_input
         ]):
@@ -1150,15 +1153,44 @@ def hr_task_assignment(request):
             )
             return redirect("hr_task_assignment")
 
-        employee = employees.filter(
-            id=employee_id
-        ).first()
+        target_team = None
+        assigned_emp = None
 
-        if not employee:
-            messages.error(
-                request,
-                "Select a valid active employee."
-            )
+        if team_id:
+            target_team = teams.filter(id=team_id).first()
+            if not target_team:
+                messages.error(request, "Select a valid team.")
+                return redirect("hr_task_assignment")
+
+            # Intelligently assign to the member of this team with lowest current active workload
+            team_members = target_team.team_members.filter(employment_status="Active")
+            if not team_members.exists():
+                team_members = target_team.team_members.all()
+
+            if team_members.exists():
+                best_member = None
+                min_active_hours = float("inf")
+                for member in team_members:
+                    active_h = sum(
+                        float(a.task.estimated_hours)
+                        for a in member.assignments.filter(status__in=["Pending", "In Progress"]).select_related("task")
+                    )
+                    if active_h < min_active_hours:
+                        min_active_hours = active_h
+                        best_member = member
+                assigned_emp = best_member or team_members.first()
+            else:
+                assigned_emp = employees.first()
+
+        elif employee_id:
+            assigned_emp = employees.filter(id=employee_id).first()
+            if not assigned_emp:
+                messages.error(request, "Select a valid active employee.")
+                return redirect("hr_task_assignment")
+            target_team = assigned_emp.team
+
+        if not assigned_emp:
+            messages.error(request, "Could not determine an employee or team to assign.")
             return redirect("hr_task_assignment")
 
         deadline = None
@@ -1192,14 +1224,37 @@ def hr_task_assignment(request):
                 )
 
                 TaskAssignment.objects.create(
-                    employee=employee,
-                    task=task
+                    employee=assigned_emp,
+                    task=task,
+                    status="Pending"
                 )
 
-            messages.success(
-                request,
-                f"Task successfully assigned to {employee.user.first_name or employee.user.username}."
-            )
+                team_display_name = target_team.name if target_team else (assigned_emp.team.name if assigned_emp.team else assigned_emp.department.name)
+                Notification.objects.create(
+                    user=assigned_emp.user,
+                    title=f"New Task Assigned: {title}",
+                    message=f"A new task '{title}' has been assigned to team {team_display_name} ({complexity} complexity, {estimated_hours}h).",
+                    category="Task"
+                )
+
+                if target_team and target_team.team_manager and target_team.team_manager != assigned_emp.user:
+                    Notification.objects.create(
+                        user=target_team.team_manager,
+                        title=f"New Task for Team: {title}",
+                        message=f"HR has assigned task '{title}' to your team {target_team.name}.",
+                        category="Task"
+                    )
+
+            if target_team:
+                messages.success(
+                    request,
+                    f"Task successfully assigned to team {target_team.name}."
+                )
+            else:
+                messages.success(
+                    request,
+                    f"Task successfully assigned to {assigned_emp.user.first_name or assigned_emp.user.username}."
+                )
 
         except IntegrityError:
             messages.error(
@@ -1215,6 +1270,7 @@ def hr_task_assignment(request):
         request,
         "Alpha/hr_task_assignment.html",
         {
+            "teams": teams,
             "employees": employees,
             "assignments": assignments,
             "total_assignments": assignments.count()
