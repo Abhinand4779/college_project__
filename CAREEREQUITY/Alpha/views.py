@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.utils import timezone
@@ -189,6 +190,7 @@ def custom_csrf_failure_view(request, reason=""):
 # LOGIN
 # =========================================================
 
+@never_cache
 @ensure_csrf_cookie
 def login_page(request):
 
@@ -400,6 +402,7 @@ def verify_jwt_reset_token(token):
         return None, f"Token verification error: {str(e)}"
 
 
+@never_cache
 @ensure_csrf_cookie
 def password_reset_request(request):
     """
@@ -467,6 +470,7 @@ def password_reset_request(request):
     )
 
 
+@never_cache
 @ensure_csrf_cookie
 def password_reset_confirm(request, token):
     """

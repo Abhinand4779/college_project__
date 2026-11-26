@@ -649,8 +649,8 @@ h1 {
 
             </label>
 
-            <a href="{% url 'password_reset_request' %}" style="text-decoration: none; color: #007d86; font-weight: 600;">
-                Forgot password? (JWT Reset)
+            <a href="/password-reset/" style="text-decoration: underline; color: #007d86; font-weight: 700; font-size: 13px;">
+                Forgot password?
             </a>
         </div>
 
@@ -662,6 +662,13 @@ h1 {
             Sign In&nbsp; →
 
         </button>
+
+        <!-- DEDICATED JWT RESET LINK -->
+        <div style="text-align: center; margin-top: 12px;">
+            <a href="/password-reset/" style="font-size: 13px; color: #007d86; font-weight: 700; text-decoration: none;">
+                🔑 Forgot password? Reset via JWT Link &rarr;
+            </a>
+        </div>
 
     </form>
 
