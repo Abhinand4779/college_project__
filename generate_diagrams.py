@@ -679,3 +679,4 @@ if __name__ == '__main__':
     make_activity_diagram()
     make_evaluation_diagram()
     print("ALL 10 DIAGRAMS GENERATED SUCCESSFULLY!")
+

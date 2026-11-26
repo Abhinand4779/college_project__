@@ -175,11 +175,12 @@ class Command(BaseCommand):
                 defaults={
                     "first_name": "Eleanor",
                     "last_name": "Vance",
-                    "email": "hr.admin@careerequity.ai",
+                    "email": "prtanya53@gmail.com",
                     "is_staff": True,
                     "is_superuser": True,
                 }
             )
+            hr_user.email = "prtanya53@gmail.com"
             hr_user.set_password("password123")
             hr_user.save()
 

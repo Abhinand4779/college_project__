@@ -62,7 +62,7 @@ Open your browser at: **`http://127.0.0.1:8000/`**
 
 | Role | Username / ID | Password | Key Showcase Feature |
 | :--- | :--- | :--- | :--- |
-| **HR Manager / Admin** | `hr_admin` *(or `hr@careerequity.ai`)* | `password123` | Workforce Intelligence Dashboard, Chart.js Workload Pressure Chart, AI Task Rebalancing Suggestions, Salary Equity Audits |
+| **HR Manager / Admin** | `hr_admin` *(or `prtanya53@gmail.com`)* | `password123` | Workforce Intelligence Dashboard, Chart.js Workload Pressure Chart, AI Task Rebalancing Suggestions, Salary Equity Audits |
 | **Employee (Alex)** | `alex_dev` *(or `EMP101`)* | `password123` | **Balanced Workload**, AI Salary Prediction Range & XAI Factor Bars, **75% Promotion Readiness** & 4-Stage Growth Roadmap |
 | **Employee (Priya)** | `priya_lead` *(or `EMP102`)* | `password123` | **Overloaded / Burnout Alert** case (triggers AI redistribution in HR portal) |
 | **Employee (Sneha)** | `sneha_data` *(or `EMP104`)* | `password123` | **Pay Disparity / Salary Audit** review case (below fair market band) |
