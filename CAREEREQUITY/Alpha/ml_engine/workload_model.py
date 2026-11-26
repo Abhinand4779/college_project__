@@ -72,17 +72,30 @@ def _train_default_workload_model():
     clf.fit(X, y)
 
     os.makedirs(MODEL_DIR, exist_ok=True)
-    joblib.dump(clf, WORKLOAD_MODEL_PATH)
+    try:
+        joblib.dump(clf, WORKLOAD_MODEL_PATH)
+    except Exception:
+        pass
     return clf
 
 
+_cached_workload_model = None
+
+
 def get_workload_model():
+    global _cached_workload_model
+    if _cached_workload_model is not None:
+        return _cached_workload_model
+
     if os.path.exists(WORKLOAD_MODEL_PATH):
         try:
-            return joblib.load(WORKLOAD_MODEL_PATH)
+            _cached_workload_model = joblib.load(WORKLOAD_MODEL_PATH)
+            return _cached_workload_model
         except Exception:
-            return _train_default_workload_model()
-    return _train_default_workload_model()
+            pass
+
+    _cached_workload_model = _train_default_workload_model()
+    return _cached_workload_model
 
 
 class WorkloadAnalyzer:

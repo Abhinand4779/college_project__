@@ -64,17 +64,30 @@ def _train_default_salary_model():
     reg.fit(X, y)
 
     os.makedirs(MODEL_DIR, exist_ok=True)
-    joblib.dump(reg, SALARY_MODEL_PATH)
+    try:
+        joblib.dump(reg, SALARY_MODEL_PATH)
+    except Exception:
+        pass
     return reg
 
 
+_cached_salary_model = None
+
+
 def get_salary_model():
+    global _cached_salary_model
+    if _cached_salary_model is not None:
+        return _cached_salary_model
+
     if os.path.exists(SALARY_MODEL_PATH):
         try:
-            return joblib.load(SALARY_MODEL_PATH)
+            _cached_salary_model = joblib.load(SALARY_MODEL_PATH)
+            return _cached_salary_model
         except Exception:
-            return _train_default_salary_model()
-    return _train_default_salary_model()
+            pass
+
+    _cached_salary_model = _train_default_salary_model()
+    return _cached_salary_model
 
 
 class SalaryEquityPredictor:

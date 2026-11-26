@@ -5,4 +5,6 @@ set -o errexit
 pip install -r requirements.txt
 cd CAREEREQUITY
 python manage.py migrate
+python manage.py seed_demo_data
 python manage.py collectstatic --no-input
+
