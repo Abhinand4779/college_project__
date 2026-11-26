@@ -79,7 +79,7 @@
                         <div>
                             <strong style="color: #1e293b; font-size: 15px;">{{ t.name }}</strong>
                             <small style="display: block; color: #64748b; font-size: 12px; margin-top: 2px;">
-                                Team Lead: <strong>{{ t.team_manager.get_full_name|default:t.team_manager.username }}</strong>
+                                Team Lead: <strong>{% if t.team_manager %}{{ t.team_manager.get_full_name|default:t.team_manager.username }}{% else %}Team Lead / Senior Member{% endif %}</strong>
                             </small>
                         </div>
                         <span style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px;">

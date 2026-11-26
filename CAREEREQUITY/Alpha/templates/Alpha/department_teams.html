@@ -29,7 +29,7 @@
                     <div>
                         <strong style="font-size: 16px; color: #1e293b;">{{ tdata.team.name }}</strong>
                         <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
-                            Team Manager: <strong style="color: #4338ca;">{{ tdata.team.team_manager.get_full_name|default:tdata.team.team_manager.username }}</strong> • {{ tdata.members_count }} Members
+                            Team Manager: <strong style="color: #4338ca;">{% if tdata.team.team_manager %}{{ tdata.team.team_manager.get_full_name|default:tdata.team.team_manager.username }}{% else %}Assigned Lead{% endif %}</strong> • {{ tdata.members_count }} Members
                         </div>
                     </div>
                     <span style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">

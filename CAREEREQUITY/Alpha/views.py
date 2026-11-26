@@ -739,10 +739,12 @@ def create_employee(request):
                     designation=position.title
                 )
 
+                default_team = Team.objects.filter(department=department).first()
                 EmployeeProfile.objects.create(
                     user=user,
                     employee_id=employee_id,
                     department=department,
+                    team=default_team,
                     position=position,
                     experience_years=experience_years,
                     joining_date=joining_date,
