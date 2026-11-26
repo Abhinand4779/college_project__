@@ -38,14 +38,14 @@
             </div>
 
             {% if not is_checked_in %}
-                <form method="POST" action="{% url 'api_check_in' %}" style="display:inline;">
+                <form method="POST" action="{% url 'api_check_in' %}" style="display:inline;" onsubmit="this.querySelector('button').disabled=true;">
                     {% csrf_token %}
                     <button type="submit" style="background: #10b981; color: white; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s;">
                         👉 Punch In Now
                     </button>
                 </form>
             {% elif not is_checked_out %}
-                <form method="POST" action="{% url 'api_check_out' %}" style="display:inline;">
+                <form method="POST" action="{% url 'api_check_out' %}" style="display:inline;" onsubmit="this.querySelector('button').disabled=true;">
                     {% csrf_token %}
                     <button type="submit" style="background: #ef4444; color: white; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s;">
                         👉 Punch Out

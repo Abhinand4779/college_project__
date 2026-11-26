@@ -41,14 +41,14 @@
             </div>
 
             {% if not today_record or not today_record.check_in %}
-                <form method="POST" action="{% url 'api_check_in' %}">
+                <form method="POST" action="{% url 'api_check_in' %}" onsubmit="this.querySelector('button').disabled=true;">
                     {% csrf_token %}
                     <button type="submit" style="width: 100%; background: #10b981; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s;">
                         👉 Check In (Punch In)
                     </button>
                 </form>
             {% elif not today_record.check_out %}
-                <form method="POST" action="{% url 'api_check_out' %}">
+                <form method="POST" action="{% url 'api_check_out' %}" onsubmit="this.querySelector('button').disabled=true;">
                     {% csrf_token %}
                     <button type="submit" style="width: 100%; background: #ef4444; color: white; border: none; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s;">
                         👉 Check Out (Punch Out)

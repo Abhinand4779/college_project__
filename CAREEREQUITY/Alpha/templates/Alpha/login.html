@@ -573,7 +573,7 @@ h1 {
 
     <!-- DJANGO LOGIN FORM -->
 
-    <form method="POST" action="{% url 'login_page' %}">
+    <form id="loginForm" method="POST" action="{% url 'login_page' %}" onsubmit="return handleLoginSubmit(this);">
         {% csrf_token %}
 
         {% if request.GET.next %}
@@ -711,6 +711,34 @@ h1 {
 
 
 <script>
+
+/* PREVENT DOUBLE SUBMISSIONS & CSRF RACE CONDITIONS */
+let isLoggingIn = false;
+function handleLoginSubmit(form) {
+    if (isLoggingIn) {
+        return false;
+    }
+    isLoggingIn = true;
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.75';
+        btn.style.cursor = 'wait';
+        btn.innerHTML = 'Signing In... ⏳';
+    }
+    return true;
+}
+
+window.addEventListener('pageshow', function() {
+    isLoggingIn = false;
+    const btn = document.querySelector('button.signin');
+    if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.innerHTML = 'Sign In&nbsp; →';
+    }
+});
 
 /* ROLE SELECTION */
 

@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.utils import timezone
@@ -156,9 +157,35 @@ def get_hr_assignments(request):
 
 
 # =========================================================
+# CSRF FAILURE HANDLER
+# =========================================================
+
+def custom_csrf_failure_view(request, reason=""):
+    """
+    Gracefully handles CSRF token mismatches (e.g., rapid double-clicks,
+    session token rotation on login, or stale cached form tokens).
+    """
+    user = getattr(request, "user", None)
+    if user and user.is_authenticated:
+        return redirect("dashboard")
+
+    session = getattr(request, "session", None)
+    if session and "_auth_user_id" in session:
+        return redirect("dashboard")
+
+    try:
+        messages.warning(request, "Your security session refreshed. Please sign in again.")
+    except Exception:
+        pass
+
+    return redirect("login_page")
+
+
+# =========================================================
 # LOGIN
 # =========================================================
 
+@ensure_csrf_cookie
 def login_page(request):
 
     if request.user.is_authenticated:
