@@ -119,7 +119,7 @@ def get_hr_employees(request):
     employees = EmployeeProfile.objects.filter(
         employment_status="Active"
     ).select_related(
-        "user", "department", "position"
+        "user", "department", "position", "team"
     )
 
     account = AccountProfile.objects.filter(
@@ -131,7 +131,7 @@ def get_hr_employees(request):
             user__account_profile__organization=account.organization
         )
 
-    return employees.order_by("user__first_name", "employee_id")
+    return employees.order_by("department__name", "team__name", "employee_id")
 
 
 def get_hr_assignments(request):
@@ -382,6 +382,26 @@ def dashboard(request):
         # AI Workload Imbalance Redistribution Suggestions
         redistributions = WorkloadAnalyzer.suggest_redistribution(employees)
 
+        # Structured Department & Team Breakdown
+        all_teams = Team.objects.select_related("department", "team_manager").order_by("department__name", "name")
+        department_structure = []
+        for dept in departments:
+            dept_teams = []
+            for t in all_teams.filter(department=dept):
+                t_members = [e for e in employees if e.team_id == t.id]
+                dept_teams.append({
+                    "team": t,
+                    "members": t_members,
+                    "count": len(t_members)
+                })
+            d_members = [e for e in employees if e.department_id == dept.id]
+            department_structure.append({
+                "department": dept,
+                "teams": dept_teams,
+                "total_members": len(d_members),
+                "roles_count": dept.positions.count()
+            })
+
         context = {
             "profile": account,
             "total_employees": total_employees,
@@ -390,6 +410,8 @@ def dashboard(request):
             "departments": departments,
             "positions": positions,
             "employees": employees,
+            "all_teams": all_teams,
+            "department_structure": department_structure,
             "workload_analyses": workload_analyses,
             "workload_alerts_count": workload_alerts_count,
             "salary_audits": salary_audits,
