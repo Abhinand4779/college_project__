@@ -13,26 +13,26 @@
         <!-- LIVE PUNCH CLOCK CARD -->
         <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; text-align: center;">
             <span style="font-size: 11px; font-weight: 800; color: #6258df; letter-spacing: 1.2px; text-transform: uppercase;">
-                LIVE ATTENDANCE TERMINAL
+                LIVE ATTENDANCE TERMINAL (IST)
             </span>
-            <div style="font-size: 34px; font-weight: 800; color: #1e293b; margin: 10px 0 4px 0;">
-                {{ now_time }}
+            <div id="liveClockIST" style="font-size: 34px; font-weight: 800; color: #1e293b; margin: 10px 0 4px 0;">
+                {{ now_time }} IST
             </div>
             <div style="font-size: 13px; color: #64748b; margin-bottom: 20px;">
-                {{ today|date:"l, F d, Y" }}
+                {{ today|date:"l, F d, Y" }} &bull; Indian Standard Time
             </div>
 
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-around;">
                     <div>
-                        <small style="color: #64748b; font-size: 11px; display: block;">CHECK IN</small>
+                        <small style="color: #64748b; font-size: 11px; display: block;">CHECK IN (IST)</small>
                         <strong style="color: #10b981; font-size: 15px;">
                             {{ today_record.check_in|time:"h:i A"|default:"--:--" }}
                         </strong>
                     </div>
                     <div style="border-right: 1px solid #e2e8f0;"></div>
                     <div>
-                        <small style="color: #64748b; font-size: 11px; display: block;">CHECK OUT</small>
+                        <small style="color: #64748b; font-size: 11px; display: block;">CHECK OUT (IST)</small>
                         <strong style="color: #ef4444; font-size: 15px;">
                             {{ today_record.check_out|time:"h:i A"|default:"--:--" }}
                         </strong>
@@ -107,8 +107,8 @@
                 <thead>
                     <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase;">
                         <th style="padding: 12px;">Date</th>
-                        <th style="padding: 12px;">Check In</th>
-                        <th style="padding: 12px;">Check Out</th>
+                        <th style="padding: 12px;">Check In (IST)</th>
+                        <th style="padding: 12px;">Check Out (IST)</th>
                         <th style="padding: 12px;">Working Hours</th>
                         <th style="padding: 12px;">Status</th>
                         <th style="padding: 12px;">Notes</th>
@@ -156,5 +156,23 @@
     </div>
 
 </div>
+
+<script>
+    function updateISTClock() {
+        const el = document.getElementById('liveClockIST');
+        if (!el) return;
+        const now = new Date();
+        const istString = now.toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Kolkata',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+        el.innerText = istString + ' IST';
+    }
+    setInterval(updateISTClock, 1000);
+    updateISTClock();
+</script>
 {% endblock %}
 

@@ -1800,19 +1800,21 @@ def api_check_in(request):
             defaults={"status": "Present"}
         )
         if not rec.check_in:
-            rec.check_in = timezone.localtime().time()
+            now_local = timezone.localtime()
+            rec.check_in = now_local.time()
             rec.status = "Present"
             rec.save()
 
+            time_str = now_local.strftime('%I:%M %p')
             Notification.objects.create(
                 user=request.user,
                 title="Attendance Check-In Confirmed",
-                message=f"Checked in successfully at {timezone.localtime().strftime('%I:%M %p')}.",
+                message=f"Checked in successfully at {time_str} IST.",
                 category="Attendance"
             )
-            messages.success(request, f"Checked in successfully at {timezone.localtime().strftime('%I:%M %p')}!")
+            messages.success(request, f"Checked in successfully at {time_str} IST!")
         else:
-            messages.info(request, f"You are already checked in at {rec.check_in.strftime('%I:%M %p')}.")
+            messages.info(request, f"You are already checked in at {rec.check_in.strftime('%I:%M %p')} IST.")
 
     return redirect(request.META.get("HTTP_REFERER", "employee_attendance"))
 
@@ -1828,7 +1830,8 @@ def api_check_out(request):
         today = timezone.localdate()
         rec = AttendanceRecord.objects.filter(employee=employee, date=today).first()
         if rec and rec.check_in:
-            rec.check_out = timezone.localtime().time()
+            now_local = timezone.localtime()
+            rec.check_out = now_local.time()
 
             # Calculate hours
             checkin_dt = datetime.combine(today, rec.check_in)
@@ -1837,13 +1840,14 @@ def api_check_out(request):
             rec.working_hours = Decimal(f"{max(0.0, duration):.2f}")
             rec.save()
 
+            time_str = now_local.strftime('%I:%M %p')
             Notification.objects.create(
                 user=request.user,
                 title="Attendance Check-Out Recorded",
-                message=f"Checked out at {timezone.localtime().strftime('%I:%M %p')}. Total shift hours: {rec.working_hours} hrs.",
+                message=f"Checked out at {time_str} IST. Total shift hours: {rec.working_hours} hrs.",
                 category="Attendance"
             )
-            messages.success(request, f"Checked out successfully at {timezone.localtime().strftime('%I:%M %p')} ({rec.working_hours} hours logged)!")
+            messages.success(request, f"Checked out successfully at {time_str} IST ({rec.working_hours} hours logged)!")
         else:
             messages.error(request, "Please check in first before checking out.")
 

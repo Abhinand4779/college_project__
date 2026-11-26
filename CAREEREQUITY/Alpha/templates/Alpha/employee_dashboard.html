@@ -24,13 +24,13 @@
         <!-- LIVE ATTENDANCE PUNCH WIDGET -->
         <div style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 16px 20px; min-width: 260px; text-align: center;">
             <div style="font-size: 11px; font-weight: 700; color: #e0e7ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
-                ⏱️ Today's Attendance
+                ⏱️ Today's Attendance (IST)
             </div>
             <div style="font-size: 14px; font-weight: 800; color: white; margin-bottom: 10px;">
                 {% if is_checked_in %}
-                    <span style="color: #86efac;">● Checked In:</span> {{ today_attendance.check_in|time:"h:i A" }}
+                    <span style="color: #86efac;">● Checked In:</span> {{ today_attendance.check_in|time:"h:i A" }} IST
                     {% if is_checked_out %}
-                        <br><span style="color: #fca5a5;">● Checked Out:</span> {{ today_attendance.check_out|time:"h:i A" }}
+                        <br><span style="color: #fca5a5;">● Checked Out:</span> {{ today_attendance.check_out|time:"h:i A" }} IST
                     {% endif %}
                 {% else %}
                     <span style="color: #fde047;">Not Checked In Yet</span>
