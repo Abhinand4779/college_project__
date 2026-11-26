@@ -7,6 +7,8 @@ urlpatterns = [
     path("accounts/login/", views.login_page, name="accounts_login"),
     path("register/", views.register_page, name="register_page"),
     path("logout/", views.logout_page, name="logout_page"),
+    path("password-reset/", views.password_reset_request, name="password_reset_request"),
+    path("password-reset/confirm/<str:token>/", views.password_reset_confirm, name="password_reset_confirm"),
 
     # Main dashboard (Auto-routed by role: HR Admin, Department Manager, Team Manager, Employee)
     path("dashboard/", views.dashboard, name="dashboard"),

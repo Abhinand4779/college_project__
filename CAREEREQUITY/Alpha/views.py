@@ -1,8 +1,12 @@
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from functools import wraps
+import hashlib
+import jwt
 
+from django.conf import settings
+from django.urls import reverse
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -340,6 +344,204 @@ def register_page(request):
             )
 
     return render(request, "Alpha/register.html")
+
+
+# =========================================================
+# JWT PASSWORD RESET WORKFLOW
+# =========================================================
+
+def generate_jwt_reset_token(user):
+    """
+    Generates a cryptographically signed, tamper-proof JSON Web Token (JWT)
+    for password reset, valid for 30 minutes. Includes a hash slice of the current
+    password so the token automatically invalidates once the password is changed.
+    """
+    now_utc = datetime.utcnow()
+    pwd_sig = hashlib.sha256(user.password.encode()).hexdigest()[:16]
+    payload = {
+        "user_id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "purpose": "password_reset",
+        "pwd_sig": pwd_sig,
+        "iat": now_utc,
+        "exp": now_utc + timedelta(minutes=30),
+    }
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+
+
+def verify_jwt_reset_token(token):
+    """
+    Decodes and validates the JWT reset token.
+    Returns (user, error_message). If valid, error_message is None.
+    """
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        if payload.get("purpose") != "password_reset":
+            return None, "Invalid token purpose."
+
+        user_id = payload.get("user_id")
+        user = User.objects.filter(id=user_id).first()
+        if not user:
+            return None, "The user account associated with this token does not exist."
+
+        # Verify password has not already been changed since token was issued
+        current_sig = hashlib.sha256(user.password.encode()).hexdigest()[:16]
+        if current_sig != payload.get("pwd_sig"):
+            return None, "This reset link has already been used. Please request a new one."
+
+        return user, None
+
+    except jwt.ExpiredSignatureError:
+        return None, "This password reset link has expired (tokens are valid for 30 minutes). Please request a new one."
+    except jwt.InvalidTokenError:
+        return None, "Invalid or tampered password reset token."
+    except Exception as e:
+        return None, f"Token verification error: {str(e)}"
+
+
+@ensure_csrf_cookie
+def password_reset_request(request):
+    """
+    Handles user requests for a JWT-based password reset link.
+    """
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    generated_link = None
+    reset_user = None
+
+    if request.method == "POST":
+        login_input = request.POST.get("login_input", "").strip()
+
+        if not login_input:
+            messages.error(request, "Please enter your username, email, or Employee ID.")
+            return render(request, "Alpha/password_reset_request.html")
+
+        # Find user by username, email, or employee_id
+        user = User.objects.filter(username__iexact=login_input).first()
+        if not user:
+            user = User.objects.filter(email__iexact=login_input).first()
+        if not user:
+            acct = AccountProfile.objects.filter(employee_id__iexact=login_input).first()
+            if acct:
+                user = acct.user
+        if not user:
+            emp = EmployeeProfile.objects.filter(employee_id__iexact=login_input).first()
+            if emp:
+                user = emp.user
+
+        if user:
+            token = generate_jwt_reset_token(user)
+            reset_url = request.build_absolute_uri(
+                reverse("password_reset_confirm", kwargs={"token": token})
+            )
+            generated_link = reset_url
+            reset_user = user
+
+            # Dispatch in-app notification
+            Notification.objects.create(
+                user=user,
+                title="Password Reset Link Generated",
+                message="A secure JWT password reset link was generated for your account. Valid for 30 minutes.",
+                category="Security"
+            )
+
+            messages.success(
+                request,
+                f"JWT reset link generated successfully for {user.username} ({user.email or 'Enterprise Account'})."
+            )
+        else:
+            messages.error(
+                request,
+                f"No account found matching '{login_input}'. Please check your credentials or contact HR."
+            )
+
+    return render(
+        request,
+        "Alpha/password_reset_request.html",
+        {
+            "generated_link": generated_link,
+            "reset_user": reset_user,
+        }
+    )
+
+
+@ensure_csrf_cookie
+def password_reset_confirm(request, token):
+    """
+    Validates the JWT token and allows the user to securely set a new password.
+    """
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    user, error_msg = verify_jwt_reset_token(token)
+
+    if error_msg:
+        return render(
+            request,
+            "Alpha/password_reset_confirm.html",
+            {
+                "is_valid": False,
+                "error_message": error_msg,
+                "token": token,
+            }
+        )
+
+    if request.method == "POST":
+        new_password = request.POST.get("new_password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+
+        if not new_password or not confirm_password:
+            messages.error(request, "Please enter both password fields.")
+            return render(
+                request,
+                "Alpha/password_reset_confirm.html",
+                {"is_valid": True, "reset_user": user, "token": token}
+            )
+
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match. Please re-enter.")
+            return render(
+                request,
+                "Alpha/password_reset_confirm.html",
+                {"is_valid": True, "reset_user": user, "token": token}
+            )
+
+        if len(new_password) < 6:
+            messages.error(request, "Password must be at least 6 characters long.")
+            return render(
+                request,
+                "Alpha/password_reset_confirm.html",
+                {"is_valid": True, "reset_user": user, "token": token}
+            )
+
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+
+        Notification.objects.create(
+            user=user,
+            title="Password Updated Successfully",
+            message="Your account password was successfully reset using JWT verification.",
+            category="Security"
+        )
+
+        messages.success(
+            request,
+            f"Password successfully reset for {user.username}! You can now sign in with your new password."
+        )
+        return redirect("login_page")
+
+    return render(
+        request,
+        "Alpha/password_reset_confirm.html",
+        {
+            "is_valid": True,
+            "reset_user": user,
+            "token": token,
+        }
+    )
 
 
 # =========================================================
