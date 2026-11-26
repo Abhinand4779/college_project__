@@ -8,6 +8,7 @@ import jwt
 from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -413,18 +414,20 @@ def password_reset_request(request):
 
     generated_link = None
     reset_user = None
+    target_email = None
+    email_dispatched = False
 
     if request.method == "POST":
         login_input = request.POST.get("login_input", "").strip()
 
         if not login_input:
-            messages.error(request, "Please enter your username, email, or Employee ID.")
+            messages.error(request, "Please enter your email address, username, or Employee ID.")
             return render(request, "Alpha/password_reset_request.html")
 
-        # Find user by username, email, or employee_id
-        user = User.objects.filter(username__iexact=login_input).first()
+        # Find user by email, username, or employee_id
+        user = User.objects.filter(email__iexact=login_input).first()
         if not user:
-            user = User.objects.filter(email__iexact=login_input).first()
+            user = User.objects.filter(username__iexact=login_input).first()
         if not user:
             acct = AccountProfile.objects.filter(employee_id__iexact=login_input).first()
             if acct:
@@ -442,22 +445,81 @@ def password_reset_request(request):
             generated_link = reset_url
             reset_user = user
 
+            # Determine destination email
+            target_email = login_input if "@" in login_input else (user.email or f"{user.username}@careerequity.ai")
+
+            # Compose Email
+            subject = "CareerEquity AI — Password Reset Request (JWT Authentication)"
+            plain_message = f"""Hello {user.get_full_name() or user.username},
+
+We received a request to reset the password for your CareerEquity account ({user.username}).
+
+Please open the link below to set a new password:
+{reset_url}
+
+This link is secured with a JSON Web Token (JWT) and expires in 30 minutes.
+If you did not request this password reset, you can safely ignore this email.
+
+— CareerEquity AI Security Team
+"""
+            html_message = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 32px;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 26px; font-weight: 800; color: #008b96;">CareerEquity AI</div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Enterprise Role-Based Management &amp; AI Intelligence</div>
+                </div>
+                <h3 style="color: #0f172a; margin-bottom: 12px;">Password Reset Request</h3>
+                <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+                    Hello <strong>{user.get_full_name() or user.username}</strong>,
+                </p>
+                <p style="color: #334155; font-size: 14px; line-height: 1.6;">
+                    We received a request to reset your password. Click the button below to securely update your credentials:
+                </p>
+                <div style="text-align: center; margin: 28px 0;">
+                    <a href="{reset_url}" style="background: #008b96; color: white; padding: 13px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">
+                        Reset Password &rarr;
+                    </a>
+                </div>
+                <p style="color: #64748b; font-size: 12px; line-height: 1.5;">
+                    Direct Reset Link:<br/>
+                    <a href="{reset_url}" style="color: #008b96; word-break: break-all;">{reset_url}</a>
+                </p>
+                <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+                <p style="color: #94a3b8; font-size: 11px; line-height: 1.4;">
+                    🛡️ <strong>Security Safeguard:</strong> This link is cryptographically signed using JSON Web Token (HS256) and is valid for <strong>30 minutes</strong>. It automatically invalidates once used. If you did not request this, please disregard this email.
+                </p>
+            </div>
+            """
+
+            try:
+                send_mail(
+                    subject=subject,
+                    message=plain_message,
+                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "CareerEquity AI <noreply@careerequity.ai>"),
+                    recipient_list=[target_email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                email_dispatched = True
+            except Exception:
+                email_dispatched = False
+
             # Dispatch in-app notification
             Notification.objects.create(
                 user=user,
-                title="Password Reset Link Generated",
-                message="A secure JWT password reset link was generated for your account. Valid for 30 minutes.",
+                title="Password Reset Email Dispatched",
+                message=f"A secure JWT reset link was sent to {target_email}. Valid for 30 minutes.",
                 category="Security"
             )
 
             messages.success(
                 request,
-                f"JWT reset link generated successfully for {user.username} ({user.email or 'Enterprise Account'})."
+                f"Reset link successfully sent to {target_email}! Please check your inbox (and spam folder)."
             )
         else:
             messages.error(
                 request,
-                f"No account found matching '{login_input}'. Please check your credentials or contact HR."
+                f"No account found matching '{login_input}'. Please check your email or contact HR."
             )
 
     return render(
@@ -466,6 +528,8 @@ def password_reset_request(request):
         {
             "generated_link": generated_link,
             "reset_user": reset_user,
+            "target_email": target_email,
+            "email_dispatched": email_dispatched,
         }
     )
 

@@ -150,4 +150,15 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 CSRF_FAILURE_VIEW = 'Alpha.views.custom_csrf_failure_view'
 
+# Email Configuration (Console Backend for Development/Demo + SMTP Configurable)
+import os
+EMAIL_BACKEND = os.getenv('DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = 'CareerEquity AI <noreply@careerequity.ai>'
+
+
 
