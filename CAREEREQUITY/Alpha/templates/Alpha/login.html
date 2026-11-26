@@ -194,22 +194,6 @@ h1 {
     gap: 5px;
 }
 
-.demo-pill {
-    background: #e2f2f5;
-    border: 1px solid #75c9d1;
-    color: #0b5962;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.demo-pill:hover {
-    background: #007d86;
-    color: white;
-}
-
 .role {
     flex: 1;
     border: none;
@@ -556,21 +540,6 @@ h1 {
         </button>
     </div>
 
-    <!-- QUICK DEMO LOGINS -->
-    <div style="background: #f0f7fb; border: 1px dashed #7fc6d0; border-radius: 12px; padding: 12px 14px; margin-bottom: 20px;">
-        <div style="font-size: 11px; font-weight: 800; color: #005b63; margin-bottom: 8px; display: flex; justify-content: space-between;">
-            <span>⚡ QUICK DEMO LOGINS</span>
-            <span style="color: #008b96;">Password: password123</span>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
-            <button type="button" class="demo-pill" onclick="quickLogin('hr_admin','password123','HR Manager/Admin')">👑 HR Admin: hr_admin</button>
-            <button type="button" class="demo-pill" onclick="quickLogin('dept_manager','password123','Department Manager')">🏢 Dept Mgr: dept_manager</button>
-            <button type="button" class="demo-pill" onclick="quickLogin('team_manager','password123','Team Manager')">👥 Team Mgr: team_manager</button>
-            <button type="button" class="demo-pill" onclick="quickLogin('alex_dev','password123','Employee')">💼 Employee: alex_dev</button>
-        </div>
-    </div>
-
-
     <!-- DJANGO LOGIN FORM -->
 
     <form id="loginForm" method="POST" action="{% url 'login_page' %}" onsubmit="return handleLoginSubmit(this);">
@@ -748,15 +717,6 @@ window.addEventListener('pageshow', function() {
 });
 
 /* ROLE SELECTION */
-
-function quickLogin(username, password, role) {
-    document.getElementById('loginInput').value = username;
-    document.getElementById('password').value = password;
-    const btn = document.querySelector(`.role[data-role="${role}"]`);
-    if (btn) {
-        selectRole(btn, role);
-    }
-}
 
 function selectRole(button, role) {
 
